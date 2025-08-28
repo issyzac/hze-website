@@ -2,6 +2,8 @@
 import Header from './components/Header'
 import HeroSection from './components/HeroSection'
 import ProductHighlights from './components/ProductHighlights'
+import WhoWeAre from './components/WhoWeAre'
+import OurStory from './components/OurStory'
 import { mockHeroData, mockProductHighlights } from './data/mockData'
 
 function App() {
@@ -19,8 +21,14 @@ function App() {
           productImages={mockHeroData.productImages}
         />
 
+        {/* Who We Are Section */}
+        <WhoWeAre />
+
+        {/* Our Story Section */}
+        <OurStory />
+
         {/* Products Section */}
-        <ProductHighlights products={mockProductHighlights} />
+        <ProductHighlights products={mockProductHighlights} /> 
 
         {/* About Section */}
         <section id="about" className="py-16 px-4 bg-coffee-cream">
