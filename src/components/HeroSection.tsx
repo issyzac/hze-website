@@ -1,104 +1,78 @@
-import React from 'react';
+ 
+import React from "react";
+import heroBg from "/assets/images/hero_bg.png";  
 
 interface HeroSectionProps {
-  title: string;
-  subtitle: string;
-  ctaText: string;
-  productImages: string[];
+  title?: string;
+  subtitle?: string;
+  ctaText?: string;
+  productImages?: string[];
+  backgroundImageUrl?: string;
 }
 
-const HeroSection: React.FC<HeroSectionProps> = ({
-  title,
+export default function HeroSection({
+  title = "Kahawa na Harakati",
   subtitle,
-  ctaText,
-  productImages
-}) => {
-  const handleCtaClick = () => {
-    // Scroll to products section
-    const productsSection = document.getElementById('products');
-    if (productsSection) {
-      productsSection.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
-    }
+  ctaText = "Shop Now",
+  productImages = [],
+  backgroundImageUrl,
+}: HeroSectionProps) {
+  const bg = backgroundImageUrl || productImages[0] || heroBg;
+
+  const scrollTo = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   return (
-    <section id="home" className="relative min-h-screen flex items-center justify-center bg-coffee-cream">
+    <section id="home" className="relative pt-48 mt-12 pb-16 bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div
+          className="relative overflow-hidden rounded-[28px] sm:rounded-[32px] lg:rounded-[36px] shadow-sm border border-coffee-brown/15"
+          style={{
+            backgroundImage: `url(${bg})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            minHeight: "62vh",
+          }}
+        >
+          <div className="absolute inset-0 bg-coffee-brown/70" />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Content Section */}
-          <div className="text-center lg:text-left">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-coffee-dark mb-6 leading-tight">
-              <span className="block font-family-inter font-thin">Harakati za Enzi</span>
-              <span className="block text-coffee-brown font-light">Coffee</span>
+          <div className="relative z-10 flex flex-col items-center text-center justify-center min-h-[62vh] p-6 sm:p-10">
+            <h1 className="text-white font-['GTAlpinaThin'] leading-tight drop-shadow-sm text-4xl sm:text-5xl lg:text-6xl xl:text-7xl">
+              {title}
             </h1>
 
-            <p className="text-lg sm:text-xl lg:text-2xl text-coffee-dark mb-4 max-w-2xl mx-auto lg:mx-0">
-              {title}
-            </p>
+            {subtitle && (
+              <p className="mt-4 max-w-2xl text-white/90 text-base sm:text-lg lg:text-xl font-['RoobertRegular']">
+                {subtitle}
+              </p>
+            )}
 
-            <p className="text-base sm:text-lg text-coffee-brown mb-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
-              {subtitle}
-            </p>
-
-            {/* CTA Button */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+            <div className="mt-8 flex flex-col sm:flex-row items-center gap-4">
               <button
-                onClick={handleCtaClick}
-                className="coffee-btn text-lg px-8 py-4 font-semibold"
+                onClick={() => scrollTo("products")}
+                className="inline-flex items-center justify-center px-8 py-4 text-lg font-['RoobertRegular'] text-white bg-coffee-gold hover:bg-coffee-gold/90 rounded-2xl shadow-sm transition-colors"
               >
                 {ctaText}
               </button>
 
               <button
-                onClick={() => {
-                  const aboutSection = document.getElementById('about');
-                  if (aboutSection) {
-                    aboutSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }
-                }}
-                className="bg-transparent border-2 border-coffee-brown text-coffee-brown hover:bg-coffee-brown hover:text-white px-8 py-4 font-semibold text-lg transition-colors duration-200"
+                onClick={() => scrollTo("about")}
+                className="inline-flex items-center justify-center px-8 py-4 text-lg font-['RoobertRegular'] border-2 border-white/80 text-white hover:bg-white/10 rounded-2xl transition-colors"
               >
                 Learn More
               </button>
             </div>
-
-
-          </div>
-
-          {/* Product Showcase Section */}
-          <div className="relative">
-            {/* Product images grid */}
-            <div className="grid grid-cols-2 gap-4">
-              {productImages.slice(0, 4).map((_, index) => (
-                <div
-                  key={index}
-                  className="coffee-card p-4"
-                >
-                  {/* Placeholder for product image */}
-                  <div className="aspect-square bg-coffee-bean flex items-center justify-center text-white font-semibold text-sm text-center p-2">
-                    Coffee Bag {index + 1}
-                    <br />
-                    <span className="text-xs">Premium Roast</span>
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
-      </div>
 
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-        <div className="w-6 h-10 border-2 border-coffee-brown flex justify-center">
-          <div className="w-1 h-3 bg-coffee-brown mt-2"></div>
+        <div className="mt-8 flex justify-center">
+          <div className="w-7 h-12 border-2 border-coffee-brown/60 rounded-full flex justify-center items-start">
+            <div className="w-1.5 h-3 mt-2 bg-coffee-brown/80 rounded-full animate-bounce" />
+          </div>
         </div>
       </div>
     </section>
   );
-};
-
-export default HeroSection;
+}

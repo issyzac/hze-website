@@ -1,147 +1,150 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from "react";
 
 interface HeaderProps {
-  isScrolled?: boolean;
+  instagramUrl?: string;
+  xUrl?: string;
+  logoSrc?: string;
 }
 
-const Header: React.FC<HeaderProps> = () => {
+
+export default function Header({
+  instagramUrl = "https://instagram.com/your-handle",
+  xUrl = "https://x.com/your-handle",
+  logoSrc = "/src/assets/hze-logo-full.svg",
+}: HeaderProps) {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
-  // Handle scroll effect for header background
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollTop = window.scrollY;
-      setIsScrolled(scrollTop > 50);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const onScroll = () => setIsScrolled(window.scrollY > 40);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Navigation items
-  const navigationItems = [
-    { name: 'Home', href: '#home' },
-    { name: 'Products', href: '#products' },
-    { name: 'About', href: '#about' },
-    { name: 'Reviews', href: '#reviews' },
-    { name: 'Bundle', href: '#bundle' },
-    { name: 'Contact', href: '#contact' },
+  const nav = [
+    { name: "Home", href: "#home" },
+    { name: "About", href: "#about" },
+    { name: "Menu", href: "#menu" },
+    { name: "Stories", href: "#stories" },
+    { name: "Impact", href: "#impact" },
+    { name: "Contact Us", href: "#contact" },
   ];
 
-  // Smooth scroll navigation handler
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+  const handleNav = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
-    const targetId = href.replace('#', '');
-    const targetElement = document.getElementById(targetId);
-    
-    if (targetElement) {
-      targetElement.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
-    }
-    
-    // Close mobile menu after navigation
-    setIsMobileMenuOpen(false);
+    const id = href.replace("#", "");
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    setOpen(false);
   };
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled
-          ? 'bg-white border-b-2 border-hze-green'
-          : 'bg-white'
+      className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
+        isScrolled ? "bg-white/95 backdrop-blur border-b border-coffee-brown/20" : "bg-white"
       }`}
     >
+      {/* Top bar: socials + mobile menu button */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <div className="flex-shrink-0">
-            <a
-              href="#home"
-              onClick={(e) => handleNavClick(e, '#home')}
-              className="flex items-center space-x-3 text-white hover:text-coffee-gold transition-colors duration-200"
-            >
-              <img 
-                src="/src/assets/hze-logo-full.svg" 
-                alt="Harakati za Enzi Roastery Logo" 
-                className="h-10 w-auto"
-              />
-            </a>
-          </div>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8">
-            {navigationItems.map((item) => (
-              <a
-                key={item.name}
-                href={item.href}
-                onClick={(e) => handleNavClick(e, item.href)}
-                className="text-enzi-db hover:text-coffee-gold transition-colors duration-200 font-family-inter font-bold"
-              >
-                {item.name}
-              </a>
-            ))}
-          </nav>
-
-          {/* Mobile menu button */}
-          <div className="md:hidden">
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="text-white hover:text-coffee-gold focus:outline-none focus:text-coffee-gold transition-colors duration-200"
-              aria-label="Toggle mobile menu"
-            >
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                {isMobileMenuOpen ? (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                ) : (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                )}
+        <div className="flex items-center justify-between h-10">
+          {/* Mobile menu button (left) */}
+          <button
+            className="md:hidden inline-flex items-center justify-center rounded-xl p-2 text-enzi-db hover:text-coffee-gold focus:outline-none"
+            aria-label="Toggle menu"
+            onClick={() => setOpen((v) => !v)}
+          >
+            {open ? (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            ) : (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 6h17"/>
+                <path d="M3 12h15"/>
+                <path d="M3 18h13"/>
               </svg>
-            </button>
-          </div>
-        </div>
+            )}
+          </button>
 
-        {/* Mobile Navigation Menu */}
-        <div
-          className={`md:hidden transition-all duration-300 ease-in-out ${
-            isMobileMenuOpen
-              ? 'max-h-64 opacity-100'
-              : 'max-h-0 opacity-0 overflow-hidden'
-          }`}
-        >
-          <div className="px-2 pt-2 pb-3 space-y-1 bg-white border-b-2 border-coffee-brown">
-            {navigationItems.map((item) => (
-              <a
-                key={item.name}
-                href={item.href}
-                onClick={(e) => handleNavClick(e, item.href)}
-                className="block px-3 py-2 text-white hover:text-coffee-gold hover:bg-coffee-brown transition-colors duration-200 font-medium"
-              >
-                {item.name}
-              </a>
-            ))}
+          {/* spacer keeps logo centered */}
+          <div className="md:flex-1" />
+
+          {/* Social icons (right) */}
+          <div className="flex items-center gap-5 mt-8">
+            <a
+              href={instagramUrl}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Instagram"
+              className="text-coffee-gold/90 hover:text-coffee-gold transition-colors"
+            >
+              {/* Instagram icon */}
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+                <rect x="3" y="3" width="18" height="18" rx="5"/>
+                <circle cx="12" cy="12" r="3.5"/>
+                <circle cx="17.5" cy="6.5" r="1"/>
+              </svg>
+            </a>
+            <a
+              href={xUrl}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="X (Twitter)"
+              className="text-coffee-gold/90 hover:text-coffee-gold transition-colors"
+            >
+              {/* X icon */}
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                <path d="M18.901 2H21l-6.64 7.59L22 22h-6.9l-4.8-6.3L4.8 22H3l7.18-8.21L2 2h7l4.3 5.7L18.901 2Zm-2.42 18h2.09L7.62 4h-2.1l10.97 16Z"/>
+              </svg>
+            </a>
           </div>
         </div>
       </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="py-4 md:py-6 flex justify-center">
+          <a href="#home" onClick={(e) => handleNav(e, "#home")} className="block">
+            <img
+              src={logoSrc}
+              alt="Harakati za Enzi Roastery Logo"
+              className="h-12 sm:h-14 md:h-16 w-auto select-none"
+            />
+          </a>
+        </div>
+      </div>
+
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <nav className="hidden md:flex items-center justify-center gap-8 pb-4">
+          {nav.map((item) => (
+            <a
+              key={item.name}
+              href={item.href}
+              onClick={(e) => handleNav(e, item.href)}
+              className="text-enzi-db font-['RoobertRegular'] tracking-tight hover:text-coffee-gold transition-colors relative py-2"
+            >
+              <span className="inline-block">{item.name}</span>
+              <span className="absolute left-1/2 -translate-x-1/2 -bottom-0.5 h-[2px] w-0 bg-coffee-gold transition-all duration-300 group-hover:w-full" />
+            </a>
+          ))}
+        </nav>
+      </div>
+
+      <div
+        className={`md:hidden overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${
+          open ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+        }`}
+      >
+        <nav className="mx-4 mb-3 rounded-2xl border border-coffee-brown/20 bg-white shadow-sm">
+          {nav.map((item) => (
+            <a
+              key={item.name}
+              href={item.href}
+              onClick={(e) => handleNav(e, item.href)}
+              className="block px-4 py-3 text-enzi-db/90 hover:text-coffee-gold hover:bg-coffee-brown/5 font-['RoobertRegular']"
+            >
+              {item.name}
+            </a>
+          ))}
+        </nav>
+      </div>
     </header>
   );
-};
-
-export default Header;
+}
