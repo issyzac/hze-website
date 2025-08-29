@@ -1,5 +1,4 @@
  
-import React from "react";
 import heroBg from "/assets/images/hero_bg.png";  
 
 interface HeroSectionProps {
@@ -8,6 +7,7 @@ interface HeroSectionProps {
   ctaText?: string;
   productImages?: string[];
   backgroundImageUrl?: string;
+  onSubscribe?: () => void;
 }
 
 export default function HeroSection({
@@ -16,6 +16,7 @@ export default function HeroSection({
   ctaText = "Shop Now",
   productImages = [],
   backgroundImageUrl,
+  onSubscribe,
 }: HeroSectionProps) {
   const bg = backgroundImageUrl || productImages[0] || heroBg;
 
@@ -51,7 +52,7 @@ export default function HeroSection({
 
             <div className="mt-8 flex flex-col sm:flex-row items-center gap-4">
               <button
-                onClick={() => scrollTo("products")}
+                onClick={onSubscribe || (() => scrollTo("products"))}
                 className="inline-flex items-center justify-center px-8 py-4 text-lg font-['RoobertRegular'] text-white bg-coffee-gold hover:bg-coffee-gold/90 rounded-2xl shadow-sm transition-colors"
               >
                 {ctaText}
@@ -61,7 +62,7 @@ export default function HeroSection({
                 onClick={() => scrollTo("about")}
                 className="inline-flex items-center justify-center px-8 py-4 text-lg font-['RoobertRegular'] border-2 border-white/80 text-white hover:bg-white/10 rounded-2xl transition-colors"
               >
-                Learn More
+                Discover Your Flavor
               </button>
             </div>
           </div>

@@ -95,7 +95,11 @@ export function ReviewsCarousel({
 
           <div
             ref={trackRef}
-            className="grid grid-flow-col auto-cols-[100%] sm:auto-cols-[85%] lg:auto-cols-[60%] gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4"
+            className="grid grid-flow-col auto-cols-[100%] sm:auto-cols-[85%] lg:auto-cols-[60%] gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 scrollbar-hide"
+            style={{
+              scrollbarWidth: 'none', /* Firefox */
+              msOverflowStyle: 'none', /* IE and Edge */
+            }}
           >
             {reviews.map((r) => (
               <figure

@@ -1,4 +1,5 @@
 
+import { useState } from 'react';
 import Header from './components/Header'
 import HeroSection from './components/HeroSection'
 import ProductHighlights from './components/ProductHighlights'
@@ -7,10 +8,17 @@ import OurStory from './components/OurStory'
 import AboutUs from './components/AboutUs'
 import ImpactSection from './components/Impact'
 import CustomerReviews from './components/CustomerReview'
+import Subscription from './components/Subscription'
 
 import { mockHeroData, mockProductHighlights } from './data/mockData'
 
 function App() {
+  const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
+
+  const openSubscriptionModal = () => {
+    setIsSubscriptionModalOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-coffee-cream">
       <Header />
@@ -21,8 +29,9 @@ function App() {
         <HeroSection
           title={mockHeroData.title}
           subtitle={mockHeroData.subtitle}
-          ctaText={mockHeroData.ctaText}
+          ctaText="Subscribe Now"
           productImages={mockHeroData.productImages}
+          onSubscribe={openSubscriptionModal}
         />
 
         {/* Who We Are Section */}
@@ -40,10 +49,16 @@ function App() {
         {/* About Section */}
         <ImpactSection />
 
+        {/* Subscription Section */}
+        <Subscription 
+          isModalOpen={isSubscriptionModalOpen}
+          onOpenModal={openSubscriptionModal}
+          onCloseModal={() => setIsSubscriptionModalOpen(false)}
+        />
+
         {/* Reviews Section */}
         <CustomerReviews />
-
-         
+ 
 
         {/* Contact Section */}
         <section id="contact" className="py-16 px-4 bg-white">

@@ -10,7 +10,7 @@ interface HeaderProps {
 export default function Header({
   instagramUrl = "https://instagram.com/your-handle",
   xUrl = "https://x.com/your-handle",
-  logoSrc = "/src/assets/hze-logo-full.svg",
+  logoSrc = "/src/assets/Hze-logo.png",
 }: HeaderProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [open, setOpen] = useState(false);
