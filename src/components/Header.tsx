@@ -6,13 +6,7 @@ interface HeaderProps {
   logoSrc?: string;
 }
 
-/**
- * Enzi Header
- * - Social icons at the very top-right
- * - Centered logo below the socials
- * - Centered menu beneath the logo
- * - Subtle border appears after scroll
- */
+
 export default function Header({
   instagramUrl = "https://instagram.com/your-handle",
   xUrl = "https://x.com/your-handle",
@@ -62,7 +56,11 @@ export default function Header({
             {open ? (
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
             ) : (
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 6h17"/>
+                <path d="M3 12h15"/>
+                <path d="M3 18h13"/>
+              </svg>
             )}
           </button>
 
@@ -101,7 +99,6 @@ export default function Header({
         </div>
       </div>
 
-      {/* Centered logo */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-4 md:py-6 flex justify-center">
           <a href="#home" onClick={(e) => handleNav(e, "#home")} className="block">
@@ -114,7 +111,6 @@ export default function Header({
         </div>
       </div>
 
-      {/* Menu row */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <nav className="hidden md:flex items-center justify-center gap-8 pb-4">
           {nav.map((item) => (
@@ -122,7 +118,7 @@ export default function Header({
               key={item.name}
               href={item.href}
               onClick={(e) => handleNav(e, item.href)}
-              className="text-enzi-db font-semibold tracking-tight hover:text-coffee-gold transition-colors relative py-2"
+              className="text-enzi-db font-['RoobertRegular'] tracking-tight hover:text-coffee-gold transition-colors relative py-2"
             >
               <span className="inline-block">{item.name}</span>
               <span className="absolute left-1/2 -translate-x-1/2 -bottom-0.5 h-[2px] w-0 bg-coffee-gold transition-all duration-300 group-hover:w-full" />
@@ -131,7 +127,6 @@ export default function Header({
         </nav>
       </div>
 
-      {/* Mobile sheet */}
       <div
         className={`md:hidden overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${
           open ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
@@ -143,7 +138,7 @@ export default function Header({
               key={item.name}
               href={item.href}
               onClick={(e) => handleNav(e, item.href)}
-              className="block px-4 py-3 text-enzi-db/90 hover:text-coffee-gold hover:bg-coffee-brown/5 font-medium"
+              className="block px-4 py-3 text-enzi-db/90 hover:text-coffee-gold hover:bg-coffee-brown/5 font-['RoobertRegular']"
             >
               {item.name}
             </a>

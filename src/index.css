@@ -32,6 +32,39 @@
   --breakpoint-2xl: 1440px;
 }
 
+@font-face {
+  font-family: "RoobertRegular";
+  src: url("/fonts/Roobert-Regular.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "RoobertMedium";
+  src: url("/fonts/Roobert-Medium.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "RoobertBold";
+  src: url("/fonts/Roobert-Bold.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "GTAlpinaThin";
+  src: url("/fonts/GT-Alpina-Thin.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+ 
+
 /* Base typography configuration */
 @layer base {
   :root {

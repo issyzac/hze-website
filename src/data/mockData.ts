@@ -156,25 +156,25 @@ export const mockProductHighlights: ProductHighlight[] = [
     id: '1',
     name: 'Original Blend',
     description: 'Our signature medium roast with rich chocolate and caramel notes',
-    image: '/images/original-highlight.jpg'
+    image: '/assets/images/coffee-bag-WEaa66D-600.png'
   },
   {
     id: '2',
     name: 'Hazelnut Delight',
     description: 'Smooth medium roast with natural hazelnut flavoring',
-    image: '/images/hazelnut-highlight.jpg'
+    image: '/assets/images/coffee-bag-WEaa66D-600.png'
   },
   {
     id: '3',
     name: 'Vanilla Dream',
     description: 'Rich dark roast with subtle vanilla undertones',
-    image: '/images/vanilla-highlight.jpg'
+    image: '/assets/images/coffee-bag-WEaa66D-600.png'
   },
   {
     id: '4',
     name: 'Decaf Harmony',
     description: 'Full-bodied decaf without compromising on taste',
-    image: '/images/decaf-highlight.jpg'
+    image: '/assets/images/coffee-bag-WEaa66D-600.png'
   }
 ];
 
