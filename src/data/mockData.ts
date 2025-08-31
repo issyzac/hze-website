@@ -223,13 +223,11 @@ export const mockSocialLinks: SocialLink[] = [
 
 // Mock hero section data
 export const mockHeroData = {
-  title: 'Tanzanian Specialty Coffee',
-  subtitle: '',
-  ctaText: 'Shop Now',
+  title: 'Find your perfect cup of coffee',
+  subtitle: 'At Harakati za Enzi, we help you discover coffee that fits your taste and your life.',
+  ctaText: 'Subscribe Now',
   productImages: [
-    '/images/hero-coffee-1.jpg',
-    '/images/hero-coffee-2.jpg',
-    '/images/hero-coffee-3.jpg'
+    '/assets/images/hero_bg.png',
   ]
 };
 

@@ -4,7 +4,7 @@ import type { ProductHighlightsProps } from "../types";
  
 const ProductHighlights: React.FC<ProductHighlightsProps> = ({ products = [] }) => {
   return (
-    <section className="py-16 px-4 bg-white">
+    <section id="products" className="py-16 px-4 bg-white">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between gap-4">
@@ -62,10 +62,15 @@ const ProductHighlights: React.FC<ProductHighlightsProps> = ({ products = [] }) 
                 </div>
                 <div className="col-span-12 md:col-span-4 md:justify-self-end">
                   <button
-                    className="inline-flex items-center justify-center whitespace-nowrap rounded-full border border-enzi-db/60 px-4 py-2 text-sm font-['RoobertRegular'] text-enzi-db hover:bg-white w-full md:w-auto"
+                    className="inline-flex items-center justify-center whitespace-nowrap rounded-full border border-enzi-db/60 px-5 py-3 sm:px-4 sm:py-2 text-base sm:text-sm font-['RoobertRegular'] text-enzi-db hover:bg-white w-full md:w-auto min-h-[48px]"
                     onClick={() => {
                       const el = document.getElementById("products");
-                      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                      if (el) {
+                        const header = document.querySelector('header');
+                        const headerHeight = header ? header.offsetHeight : 0;
+                        const elementPosition = el.getBoundingClientRect().top + window.pageYOffset;
+                        window.scrollTo({ top: elementPosition - headerHeight, behavior: 'smooth' });
+                      }
                     }}
                     aria-label={`Order ${(product as any).name}`}
                   >
