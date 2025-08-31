@@ -5,18 +5,37 @@ import HeroSection from './components/HeroSection'
 import ProductHighlights from './components/ProductHighlights'
 import WhoWeAre from './components/WhoWeAre'
 import OurStory from './components/OurStory'
-import AboutUs from './components/AboutUs'
+import OurValues from './components/OurValues'
 import ImpactSection from './components/Impact'
 import CustomerReviews from './components/CustomerReview'
-import Subscription from './components/Subscription'
+import SubscriptionWizard from './components/Subscription'
+import MobileSubscriptionFlow from './components/MobileSubscriptionFlow'
 
 import { mockHeroData, mockProductHighlights } from './data/mockData'
+import { useIsMobile } from './hooks/useIsMobile'
+import axios from 'axios'
+import type { SubscriptionData } from './components/MobileSubscriptionFlow'
 
 function App() {
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const isMobile = useIsMobile();
 
   const openSubscriptionModal = () => {
     setIsSubscriptionModalOpen(true);
+  };
+
+  const handleSubscriptionSubmit = async (data: SubscriptionData) => {
+    try {
+      console.log('Raw JSON data being sent:', JSON.stringify(data, null, 2)); 
+      await axios.post('https://api.example.com/subscriptions', data);
+      setIsSubscriptionModalOpen(false);
+      setShowSuccessMessage(true); 
+      setTimeout(() => setShowSuccessMessage(false), 5000);
+    } catch (error) {
+      console.error('Subscription submission failed:', error); 
+      alert('Failed to submit subscription. Please try again.');
+    }
   };
 
   return (
@@ -40,8 +59,8 @@ function App() {
         {/* Our Story Section */}
         <OurStory />
 
-        {/* About Us Section */}
-        <AboutUs />
+        {/* Our Values Section */}
+        <OurValues />
 
         {/* Products Section */}
         <ProductHighlights products={mockProductHighlights} /> 
@@ -50,11 +69,37 @@ function App() {
         <ImpactSection />
 
         {/* Subscription Section */}
-        <Subscription 
-          isModalOpen={isSubscriptionModalOpen}
-          onOpenModal={openSubscriptionModal}
-          onCloseModal={() => setIsSubscriptionModalOpen(false)}
-        />
+        {isMobile ? (
+          <MobileSubscriptionFlow 
+            isOpen={isSubscriptionModalOpen}
+            onClose={() => setIsSubscriptionModalOpen(false)}
+            onSubmit={handleSubscriptionSubmit}
+          />
+        ) : (
+          <SubscriptionWizard 
+            isOpen={isSubscriptionModalOpen}
+            onClose={() => setIsSubscriptionModalOpen(false)}
+            onSubmit={handleSubscriptionSubmit}
+          />
+        )}
+
+        {/* Success Message */}
+        {showSuccessMessage && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl shadow-2xl border border-coffee-brown/15 p-8 max-w-md mx-auto text-center">
+              <h3 className="text-xl font-bold text-coffee-brown mb-4">Welcome to Harakati za Enzi!</h3>
+              <p className="text-enzi-db">
+                You’re joining Harakati za Enzi, a movement that honours every hand along the way. Expect a confirmation email, and let us know if your tastes evolve; we’re here to guide you.
+              </p>
+              <button 
+                onClick={() => setShowSuccessMessage(false)}
+                className="mt-6 coffee-btn"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Reviews Section */}
         <CustomerReviews />

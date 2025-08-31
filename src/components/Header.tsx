@@ -23,9 +23,9 @@ export default function Header({
 
   const nav = [
     { name: "Home", href: "#home" },
-    { name: "About", href: "#about" },
-    { name: "Menu", href: "#menu" },
-    { name: "Stories", href: "#stories" },
+    { name: "About", href: "#who-we-are" },
+    { name: "Values", href: "#our-values" },
+    { name: "Stories", href: "#our-story" },
     { name: "Impact", href: "#impact" },
     { name: "Contact Us", href: "#contact" },
   ];
@@ -34,7 +34,12 @@ export default function Header({
     e.preventDefault();
     const id = href.replace("#", "");
     const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (el) {
+      const header = document.querySelector('header');
+      const headerHeight = header ? header.offsetHeight : 0;
+      const elementPosition = el.getBoundingClientRect().top + window.pageYOffset;
+      window.scrollTo({ top: elementPosition - headerHeight, behavior: 'smooth' });
+    }
     setOpen(false);
   };
 
@@ -49,7 +54,7 @@ export default function Header({
         <div className="flex items-center justify-between h-10">
           {/* Mobile menu button (left) */}
           <button
-            className="md:hidden inline-flex items-center justify-center rounded-xl p-2 text-enzi-db hover:text-coffee-gold focus:outline-none"
+            className="md:hidden inline-flex items-center justify-center rounded-xl p-3 text-enzi-db hover:text-coffee-gold focus:outline-none min-h-[48px] min-w-[48px]"
             aria-label="Toggle menu"
             onClick={() => setOpen((v) => !v)}
           >
@@ -68,16 +73,16 @@ export default function Header({
           <div className="md:flex-1" />
 
           {/* Social icons (right) */}
-          <div className="flex items-center gap-5 mt-8">
+          <div className="flex items-center gap-4 sm:gap-5 mt-8">
             <a
               href={instagramUrl}
               target="_blank"
               rel="noreferrer"
               aria-label="Instagram"
-              className="text-coffee-gold/90 hover:text-coffee-gold transition-colors"
+              className="text-coffee-gold/90 hover:text-coffee-gold transition-colors min-h-[48px] min-w-[48px] flex items-center justify-center"
             >
               {/* Instagram icon */}
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
                 <rect x="3" y="3" width="18" height="18" rx="5"/>
                 <circle cx="12" cy="12" r="3.5"/>
                 <circle cx="17.5" cy="6.5" r="1"/>
@@ -88,10 +93,10 @@ export default function Header({
               target="_blank"
               rel="noreferrer"
               aria-label="X (Twitter)"
-              className="text-coffee-gold/90 hover:text-coffee-gold transition-colors"
+              className="text-coffee-gold/90 hover:text-coffee-gold transition-colors min-h-[48px] min-w-[48px] flex items-center justify-center"
             >
               {/* X icon */}
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
                 <path d="M18.901 2H21l-6.64 7.59L22 22h-6.9l-4.8-6.3L4.8 22H3l7.18-8.21L2 2h7l4.3 5.7L18.901 2Zm-2.42 18h2.09L7.62 4h-2.1l10.97 16Z"/>
               </svg>
             </a>
@@ -100,7 +105,7 @@ export default function Header({
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="py-4 md:py-6 flex justify-center">
+        <div className="py-4 md:py-6 mt-4 md:mt-0 flex justify-center">
           <a href="#home" onClick={(e) => handleNav(e, "#home")} className="block">
             <img
               src={logoSrc}
@@ -138,7 +143,7 @@ export default function Header({
               key={item.name}
               href={item.href}
               onClick={(e) => handleNav(e, item.href)}
-              className="block px-4 py-3 text-enzi-db/90 hover:text-coffee-gold hover:bg-coffee-brown/5 font-['RoobertRegular']"
+              className="block px-6 py-4 text-enzi-db/90 hover:text-coffee-gold hover:bg-coffee-brown/5 font-['RoobertRegular'] min-h-[48px] flex items-center"
             >
               {item.name}
             </a>

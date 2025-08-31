@@ -1,70 +1,144 @@
-import { useMemo, useState, useEffect } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+ 
 
-// -----------------------------
+import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { AnimatePresence, motion, type Transition } from "framer-motion";
+
+// ------------------------------------------------------
 // Types
-// -----------------------------
+// ------------------------------------------------------
+type CupsRange = "Up to 4" | "4–8" | "8–12";
+type BrewMethod = "Espresso" | "Pour-Over" | "French Press" | "Cold Brew";
+type FlavorProfile =
+  | "Bright & Fruity"
+  | "Nutty & Chocolatey"
+  | "Balanced & Smooth"
+  | "Surprise me!";
+type GrindPref = "Whole Bean" | "Ground";
+type Size = "250g" | "500g" | "1kg";
+type Schedule = "Every 2 weeks" | "Every 4 weeks";
+
 interface SubscriptionData {
-  coffeeMethod: string;
-  roastLevel: string;
-  grind: string;
-  size: string;
-  schedule: string;
+  cupsRange: CupsRange | "";
+  brewMethod: BrewMethod | "";
+  flavorProfile: FlavorProfile | "";
+  grindPref: GrindPref | "";
+  autoGrindNote?: string;  
+  schedule: Schedule | "";
+  size: Size | "";  
   fullName: string;
   email: string;
   phone?: string;
 }
 
-interface SubscriptionModalProps {
+interface SubscriptionWizardProps {
   isOpen: boolean;
   onClose: () => void;
+  onSubmit?: (data: SubscriptionData) => Promise<void> | void;
 }
 
-// -----------------------------
-// Helpers
-// -----------------------------
+// ------------------------------------------------------
+// Constants & Helpers
+// ------------------------------------------------------
 const emailRegex = /[^\s@]+@[^\s@]+\.[^\s@]+/;
-const phoneRegex = /^[+]?\d{6,15}$/;
+const phoneRegex = /^[+]?[\d ()-]{6,20}$/;
 
 const cardBase =
   "rounded-2xl border border-coffee-brown/20 bg-[#F7F3ED] px-4 py-3 md:px-6 md:py-4 transition transform hover:scale-[1.02] focus-within:ring-2 focus-within:ring-coffee-gold/50";
 
-function RadioCard({
+const CUP_OPTIONS: CupsRange[] = ["Up to 4", "4–8", "8–12"];
+const BREW_OPTIONS: BrewMethod[] = ["Espresso", "Pour-Over", "French Press", "Cold Brew"];
+const FLAVOR_OPTIONS: FlavorProfile[] = [
+  "Bright & Fruity",
+  "Nutty & Chocolatey",
+  "Balanced & Smooth",
+  "Surprise me!",
+];
+const GRIND_OPTIONS: GrindPref[] = ["Whole Bean", "Ground"];
+const SIZE_OPTIONS: Size[] = ["250g", "500g", "1kg"];
+const SCHEDULE_OPTIONS: Schedule[] = ["Every 2 weeks", "Every 4 weeks"];
+
+const brewToGrindMap: Record<BrewMethod, string> = {
+  Espresso: "Fine grind for espresso",
+  "Pour-Over": "Medium grind for pour-over",
+  "French Press": "Coarse grind for immersion",
+  "Cold Brew": "Extra-coarse grind for steeping",
+};
+
+function recommendSize(cupsRange: CupsRange | ""): Size | "" {
+  switch (cupsRange) {
+    case "Up to 4":
+      return "250g";
+    case "4–8":
+      return "500g";
+    case "8–12":
+      return "1kg"; 
+    default:
+      return "";
+  }
+}
+
+function prefersReducedMotion() {
+  return (
+    typeof window !== "undefined" &&
+    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+  );
+}
+
+function useLockBodyScroll(lock: boolean) {
+  useEffect(() => {
+    if (!lock) return;
+    const { overflow } = document.body.style;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = overflow;
+    };
+  }, [lock]);
+}
+
+// ------------------------------------------------------
+// Reusable UI
+// ------------------------------------------------------
+const RadioCard = React.memo(function RadioCard({
   name,
   value,
   checked,
   onChange,
   label,
-  imageSrc,
+  description,
 }: {
   name: string;
   value: string;
   checked: boolean;
   onChange: (val: string) => void;
   label: string;
-  imageSrc?: string;
+  description?: string;
 }) {
   return (
-    <label className={`${cardBase} cursor-pointer flex items-center gap-3`}>
+    <label className={`${cardBase} cursor-pointer flex items-start gap-3`}>
       <input
         type="radio"
         name={name}
         value={value}
         checked={checked}
         onChange={(e) => onChange(e.target.value)}
-        className="h-5 w-5 accent-coffee-gold"
+        className="mt-1 h-6 w-6 sm:h-5 sm:w-5 shrink-0 accent-coffee-gold"
       />
-      {imageSrc && <img src={imageSrc} alt="" className="h-6 w-6 object-contain" />}
-      <span className="text-enzi-db font-medium">{label}</span>
+      <span className="text-enzi-db">
+        <span className="block font-medium">{label}</span>
+        {description && (
+          <span className="block text-sm text-enzi-db">{description}</span>
+        )}
+      </span>
     </label>
   );
-}
+});
 
 function Progress({ stepIndex, total }: { stepIndex: number; total: number }) {
-  const percent = ((stepIndex + 1) / total) * 100;
+  // CHANGED: keep bar, remove percentage text
+  const percent = Math.round(((stepIndex + 1) / total) * 100);
   return (
     <div className="w-full mb-6">
-      <div className="h-2 w-full bg-enzi-db/10 rounded-full overflow-hidden">
+      <div className="h-2 w-full bg-enzi-db/10 rounded-full overflow-hidden" aria-hidden="true">
         <motion.div
           className="h-2 bg-coffee-gold"
           initial={{ width: 0 }}
@@ -72,82 +146,70 @@ function Progress({ stepIndex, total }: { stepIndex: number; total: number }) {
           transition={{ type: "spring", stiffness: 120, damping: 20 }}
         />
       </div>
-      <div className="mt-3 text-sm text-enzi-db/70 tracking-wide">
+      <div className="mt-3 text-sm text-enzi-db/70 tracking-wide" aria-live="polite">
         Step {stepIndex + 1} of {total}
       </div>
     </div>
   );
 }
 
-function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
-  const steps = ["method", "roast", "grind", "size", "schedule", "contact"] as const;
+// ------------------------------------------------------
+// Main Component (3 slides)
+// ------------------------------------------------------
+export default function SubscriptionWizard({
+  isOpen,
+  onClose,
+  onSubmit,
+}: SubscriptionWizardProps) {
+  const steps = ["cups", "brew", "schedule"] as const;
   type StepKey = typeof steps[number];
 
-  const [step, setStep] = useState<StepKey>("method");
+  const subStepsMap: Record<StepKey, string[]> = {
+    cups: ["cups"],
+    brew: ["brewMethod", "flavor", "grind"],
+    schedule: ["frequency", "size", "contact", "summary"],
+  };
+
+  const [step, setStep] = useState<StepKey>("cups");
+  const [subStep, setSubStep] = useState<string>("cups");
   const [dir, setDir] = useState<1 | -1>(1);
+  const total = steps.length;
+  const index = steps.indexOf(step);
+
   const [data, setData] = useState<SubscriptionData>({
-    coffeeMethod: "",
-    roastLevel: "",
-    grind: "",
-    size: "",
+    cupsRange: "",
+    brewMethod: "",
+    flavorProfile: "",
+    grindPref: "",
+    autoGrindNote: "",
     schedule: "",
+    size: "",
     fullName: "",
     email: "",
     phone: "",
   });
-  const total = steps.length;
-  const index = steps.indexOf(step);
 
-  const isValid = useMemo(() => {
-    switch (step) {
-      case "method": return !!data.coffeeMethod;
-      case "roast": return !!data.roastLevel;
-      case "grind": return !!data.grind;
-      case "size": return !!data.size;
-      case "schedule": return !!data.schedule;
-      case "contact": {
-        const nameOk = data.fullName.trim().length > 0;
-        const emailOk = emailRegex.test(data.email);
-        const phoneOk = !data.phone || phoneRegex.test(data.phone);
-        return nameOk && emailOk && phoneOk;
-      }
-    }
-  }, [step, data]);
+  // a11y & UX helpers
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const previouslyFocused = useRef<HTMLElement | null>(null);
+  useLockBodyScroll(isOpen);
 
-  const next = () => {
-    if (index < total - 1 && isValid) {
-      setDir(1);
-      setStep(steps[index + 1]);
-    } else if (index === total - 1 && isValid) {
-      console.log("Subscription submitted:", data);
-      alert("Subscribed! Check console for JSON.");
-      onClose();
-    }
-  };
-
-  const back = () => {
-    if (index > 0) {
-      setDir(-1);
-      setStep(steps[index - 1]);
-    }
-  };
-
-  const variants = {
-    enter: (direction: 1 | -1) => ({ x: direction * 60, opacity: 0 }),
-    center: { x: 0, opacity: 1 },
-    exit: (direction: 1 | -1) => ({ x: direction * -60, opacity: 0 }),
-  };
-
-  // Reset form when modal closes
   useEffect(() => {
-    if (!isOpen) {
-      setStep("method");
+    if (isOpen) {
+      previouslyFocused.current = document.activeElement as HTMLElement | null;
+      setTimeout(() => dialogRef.current?.focus(), 0);
+    } else {
+      previouslyFocused.current?.focus?.();
+      setStep("cups");
+      setSubStep("cups");
       setData({
-        coffeeMethod: "",
-        roastLevel: "",
-        grind: "",
-        size: "",
+        cupsRange: "",
+        brewMethod: "",
+        flavorProfile: "",
+        grindPref: "",
+        autoGrindNote: "",
         schedule: "",
+        size: "",
         fullName: "",
         email: "",
         phone: "",
@@ -155,7 +217,164 @@ function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+      }
+      if (e.key === "Tab" && dialogRef.current) {
+        const focusables = dialogRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
+        );
+        const nodes = Array.from(focusables).filter((el) => el.offsetParent !== null);
+        if (nodes.length === 0) return;
+        const first = nodes[0];
+        const last = nodes[nodes.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [isOpen, onClose]);
+
+  // derived values
+  const showCupsNote = !!data.cupsRange;
+  const suggestedSize = useMemo(() => recommendSize(data.cupsRange), [data.cupsRange]);
+
+  useEffect(() => {
+    if (data.grindPref === "Ground" && data.brewMethod) {
+      setData((d) => ({ ...d, autoGrindNote: brewToGrindMap[d.brewMethod as BrewMethod] }));
+    } else if (data.grindPref !== "Ground") {
+      setData((d) => ({ ...d, autoGrindNote: "" }));
+    }
+  }, [data.grindPref, data.brewMethod]);
+
+  const isValid = useMemo(() => {
+    switch (step) {
+      case "cups":
+        return !!data.cupsRange;
+      case "brew":
+        switch (subStep) {
+          case "brewMethod": return !!data.brewMethod;
+          case "flavor": return !!data.flavorProfile;
+          case "grind": return !!data.grindPref;
+          default: return false;
+        }
+      case "schedule":
+        switch (subStep) {
+          case "frequency": return !!data.schedule;
+          case "size": return !!data.size;
+          case "contact": {
+            const nameOk = data.fullName.trim().length > 0;
+            const emailOk = emailRegex.test(data.email);
+            const phoneOk = !data.phone || phoneRegex.test(data.phone);
+            return nameOk && emailOk && phoneOk;
+          }
+          case "summary": return true;
+          default: return false;
+        }
+    }
+  }, [step, subStep, data]);
+
+  const setField = useCallback(
+    (k: keyof SubscriptionData) => (val: string) =>
+      setData((d) => ({ ...d, [k]: val })),
+    []
+  );
+
+  const toStep = (target: StepKey) => {
+    setDir(steps.indexOf(target) > index ? 1 : -1);
+    setStep(target);
+    setSubStep(subStepsMap[target][0]);
+  };
+
+  const next = async () => {
+    if (!isValid) return;
+    const currentSubSteps = subStepsMap[step];
+    const subIndex = currentSubSteps.indexOf(subStep);
+    if (subIndex < currentSubSteps.length - 1) {
+      setDir(1);
+      setSubStep(currentSubSteps[subIndex + 1]);
+    } else if (index < total - 1) {
+      setDir(1);
+      setStep(steps[index + 1]);
+      setSubStep(subStepsMap[steps[index + 1]][0]);
+    } else {
+      await submit();
+    }
+  };
+
+  const back = () => {
+    const currentSubSteps = subStepsMap[step];
+    const subIndex = currentSubSteps.indexOf(subStep);
+    if (subIndex > 0) {
+      setDir(-1);
+      setSubStep(currentSubSteps[subIndex - 1]);
+    } else if (index > 0) {
+      setDir(-1);
+      setStep(steps[index - 1]);
+      const prevSubSteps = subStepsMap[steps[index - 1]];
+      setSubStep(prevSubSteps[prevSubSteps.length - 1]);
+    }
+  };
+
+  const [submitting, setSubmitting] = useState(false);
+  const submit = async () => {
+    if (!isValid || index !== total - 1) return;
+    try {
+      setSubmitting(true);
+      await onSubmit?.(data);
+      onClose();
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // NEW: helper to auto-advance after setting a selection
+  const setFieldAndAutoNext = useCallback(
+    (k: keyof SubscriptionData) => (val: string) => {
+      setData((d) => ({ ...d, [k]: val }));
+      // Let React apply state before checking isValid/advancing
+      setTimeout(() => {
+        // For “brew” and “schedule” (except contact & summary), auto-advance
+        if (
+          (step === "brew" && ["brewMethod", "flavor", "grind"].includes(subStep)) ||
+          (step === "schedule" && ["frequency", "size"].includes(subStep))
+        ) {
+          // Temporarily bypass isValid race by assuming this selection satisfies the subStep
+          setDir(1);
+          const current = subStepsMap[step];
+          const idx = current.indexOf(subStep);
+          if (idx < current.length - 1) {
+            setSubStep(current[idx + 1]);
+          } else if (index < total - 1) {
+            setStep(steps[index + 1]);
+            setSubStep(subStepsMap[steps[index + 1]][0]);
+          }
+        }
+      }, 0);
+    },
+    [index, step, subStep, steps, subStepsMap, total]
+  );
+
   if (!isOpen) return null;
+  const motionTransition: Transition = prefersReducedMotion()
+    ? { duration: 0 }
+    : { type: "spring", stiffness: 300, damping: 30 };
+
+  const variants = {
+    enter: (direction: 1 | -1) => ({ x: direction * 60, opacity: 0 }),
+    center: { x: 0, opacity: 1 },
+    exit: (direction: 1 | -1) => ({ x: direction * -60, opacity: 0 }),
+  } as const;
 
   return (
     <AnimatePresence>
@@ -164,6 +383,7 @@ function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        onClick={onClose}
       >
         {/* Backdrop */}
         <motion.div
@@ -171,145 +391,438 @@ function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="absolute inset-0 bg-coffee-brown/60 backdrop-blur-sm"
-          onClick={onClose}
+          aria-hidden="true"
         />
 
         {/* Modal */}
         <motion.div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="subscription-title"
+          tabIndex={-1}
+          ref={dialogRef}
           initial={{ scale: 0.9, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="relative max-w-2xl w-full max-h-[90vh] overflow-y-auto bg-white rounded-3xl shadow-2xl border border-coffee-brown/15"
+          transition={motionTransition}
+          className="relative max-w-2xl w-full max-h-[90vh] overflow-y-auto bg-white rounded-3xl shadow-2xl border border-coffee-brown/15 mx-4 sm:mx-6"
+          onClick={(e) => e.stopPropagation()}
         >
-          {/* Close button */}
+          {/* Close */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-coffee-cream/80 hover:bg-coffee-cream text-coffee-brown transition-colors"
+            className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center rounded-full bg-coffee-cream/80 hover:bg-coffee-cream text-coffee-brown transition-colors"
+            aria-label="Close subscription dialog"
           >
             ✕
           </button>
 
-          <div className="p-6 sm:p-8 md:p-10">
+          <div className="p-4 sm:p-6 md:p-8 lg:p-10">
             <div className="mb-6">
-              <div className="text-enzi-db/80 text-sm font-semibold tracking-[0.15em] uppercase mb-2">SUBSCRIBE</div>
-              <h2 className="text-2xl md:text-3xl font-serif text-enzi-db">Build your coffee subscription</h2>
+              <div className="text-enzi-db/80 text-sm font-['RoobertRegular'] tracking-[0.15em] uppercase mb-2">
+                SUBSCRIBE
+              </div>
+              <h2 id="subscription-title" className="text-xl sm:text-2xl md:text-3xl font-['GTAlpinaThin'] text-enzi-db">
+                Build your coffee subscription
+              </h2>
             </div>
 
             <div className="coffee-card bg-[#F7F3ED] rounded-3xl border border-coffee-brown/15 shadow-sm p-5 sm:p-7 md:p-8">
               <Progress stepIndex={index} total={total} />
 
-              <div className="relative min-h-[280px]">
+              <div className="relative min-h-[320px]">
                 <AnimatePresence mode="wait" custom={dir}>
-                  {step === "method" && (
-                    <motion.div key="method" custom={dir} variants={variants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35, ease: "easeInOut" }} className="absolute inset-0">
-                      <h3 className="text-xl md:text-2xl font-bold text-coffee-brown mb-4">How do you make your coffee?</h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {["Coffee Maker","Espresso","Aeropress","French Press","Cold Brew"].map((opt) => (
-                          <RadioCard key={opt} name="coffeeMethod" value={opt} checked={data.coffeeMethod === opt} onChange={(val) => setData((d) => ({ ...d, coffeeMethod: val }))} label={opt} imageSrc="/icons/placeholder.png" />
-                        ))}
-                      </div>
-                    </motion.div>
+                  {/* Slide 1: Cups per week */}
+                  {step === "cups" && (
+                    <motion.section
+                      key="cups"
+                      custom={dir}
+                      variants={variants}
+                      initial="enter"
+                      animate="center"
+                      exit="exit"
+                      transition={{ duration: 0.35, ease: "easeInOut" }}
+                      className="absolute inset-0"
+                    >
+                      <header className="mb-4">
+                        <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-coffee-brown">
+                          How many cups do you enjoy each week?
+                        </h3>
+                        <p className="mt-1 text-enzi-db text-sm">
+                          Every journey starts with you. Tell us roughly how much coffee fuels your days, and we’ll recommend the right bag size and frequency.
+                        </p>
+                      </header>
+
+                      <fieldset>
+                        <legend className="sr-only">Cups per week</legend>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {CUP_OPTIONS.map((opt) => (
+                            <RadioCard
+                              key={opt}
+                              name="cupsRange"
+                              value={opt}
+                              checked={data.cupsRange === opt}
+                              onChange={setField("cupsRange")}
+                              label={opt}
+                            />
+                          ))}
+                        </div>
+                      </fieldset>
+
+                      {showCupsNote && (
+                        <div className="mt-4 text-sm text-coffee-brown/90 bg-white border border-coffee-brown/20 rounded-xl p-3">
+                          Suggested size: <strong className="font-['RoobertBold']">{suggestedSize} per month</strong> based on your pace. You can adjust later.
+                        </div>
+                      )}
+                    </motion.section>
                   )}
 
-                  {step === "roast" && (
-                    <motion.div key="roast" custom={dir} variants={variants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35, ease: "easeInOut" }} className="absolute inset-0">
-                      <h3 className="text-xl md:text-2xl font-bold text-coffee-brown mb-4">What's your go-to roast level?</h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {["Light","Dark","Medium","Choose for me"].map((opt) => (
-                          <RadioCard key={opt} name="roastLevel" value={opt} checked={data.roastLevel === opt} onChange={(val) => setData((d) => ({ ...d, roastLevel: val }))} label={opt} imageSrc="/icons/placeholder.png" />
-                        ))}
+                  {/* Slide 2: Brew & Taste */}
+                  {step === "brew" && (
+                    <motion.section
+                      key="brew"
+                      custom={dir}
+                      variants={variants}
+                      initial="enter"
+                      animate="center"
+                      exit="exit"
+                      transition={{ duration: 0.35, ease: "easeInOut" }}
+                      className="absolute inset-0"
+                    >
+                      <header className="mb-4">
+                        <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-coffee-brown">
+                          How do you like to brew and taste your coffee?
+                        </h3>
+                        <p className="mt-1 text-enzi-db text-sm">
+                          Tell us how you brew and what flavours you love, and we’ll select the perfect roast and grind on your behalf. You’re one step away from a cup that feels made just for you.
+                        </p>
+                      </header>
+
+                      <div className="space-y-6">
+                        <AnimatePresence mode="wait" custom={dir}>
+                          {subStep === "brewMethod" && (
+                            <motion.fieldset
+                              key="brewMethod"
+                              custom={dir}
+                              variants={variants}
+                              initial="enter"
+                              animate="center"
+                              exit="exit"
+                              transition={{ duration: 0.35, ease: "easeInOut" }}
+                            >
+                              <legend className="block text-enzi-db text-sm mb-2">Brew method</legend>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {BREW_OPTIONS.map((opt) => (
+                                  <RadioCard
+                                    key={opt}
+                                    name="brewMethod"
+                                    value={opt}
+                                    checked={data.brewMethod === opt}
+                                    onChange={setFieldAndAutoNext("brewMethod")} // CHANGED
+                                    label={opt}
+                                  />
+                                ))}
+                              </div>
+                            </motion.fieldset>
+                          )}
+
+                          {subStep === "flavor" && (
+                            <motion.fieldset
+                              key="flavor"
+                              custom={dir}
+                              variants={variants}
+                              initial="enter"
+                              animate="center"
+                              exit="exit"
+                              transition={{ duration: 0.35, ease: "easeInOut" }}
+                            >
+                              <legend className="block text-enzi-db text-sm mb-2">Flavour profile</legend>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {FLAVOR_OPTIONS.map((opt) => (
+                                  <RadioCard
+                                    key={opt}
+                                    name="flavorProfile"
+                                    value={opt}
+                                    checked={data.flavorProfile === opt}
+                                    onChange={setFieldAndAutoNext("flavorProfile")}  
+                                    label={opt}
+                                    description={
+                                      opt === "Bright & Fruity"
+                                        ? ""
+                                        : opt === "Nutty & Chocolatey"
+                                        ? ""
+                                        : opt === "Balanced & Smooth"
+                                        ? ""
+                                        : ""
+                                    }
+                                  />
+                                ))}
+                              </div>
+                            </motion.fieldset>
+                          )}
+
+                          {subStep === "grind" && (
+                            <motion.fieldset
+                              key="grind"
+                              custom={dir}
+                              variants={variants}
+                              initial="enter"
+                              animate="center"
+                              exit="exit"
+                              transition={{ duration: 0.35, ease: "easeInOut" }}
+                            >
+                              <legend className="block text-enzi-db text-sm mb-2">Grind preference</legend>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md">
+                                {GRIND_OPTIONS.map((opt) => (
+                                  <RadioCard
+                                    key={opt}
+                                    name="grindPref"
+                                    value={opt}
+                                    checked={data.grindPref === opt}
+                                    onChange={setFieldAndAutoNext("grindPref")} 
+                                    label={opt}
+                                    description={
+                                      opt === "Ground"
+                                        ? data.brewMethod
+                                          ? `We'll match: ${brewToGrindMap[data.brewMethod as BrewMethod]}`
+                                          : "We'll match grind size to your brew method"
+                                        : "Best freshness and flexibility"
+                                    }
+                                  />
+                                ))}
+                              </div>
+                            </motion.fieldset>
+                          )}
+                        </AnimatePresence>
                       </div>
-                    </motion.div>
+                    </motion.section>
                   )}
 
-                  {step === "grind" && (
-                    <motion.div key="grind" custom={dir} variants={variants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35, ease: "easeInOut" }} className="absolute inset-0">
-                      <h3 className="text-xl md:text-2xl font-bold text-coffee-brown mb-4">What’s your grind preference?</h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {["Whole Bean","Ground"].map((opt) => (
-                          <RadioCard key={opt} name="grind" value={opt} checked={data.grind === opt} onChange={(val) => setData((d) => ({ ...d, grind: val }))} label={opt} imageSrc="/icons/placeholder.png" />
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {step === "size" && (
-                    <motion.div key="size" custom={dir} variants={variants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35, ease: "easeInOut" }} className="absolute inset-0">
-                      <h3 className="text-xl md:text-2xl font-bold text-coffee-brown mb-4">Select Size</h3>
-                      <div className="grid grid-cols-2 gap-3 max-w-xs">
-                        {["250g","500g"].map((opt) => (
-                          <RadioCard key={opt} name="size" value={opt} checked={data.size === opt} onChange={(val) => setData((d) => ({ ...d, size: val }))} label={opt} imageSrc="/icons/placeholder.png" />
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-
+                  {/* Slide 3: Schedule, Size confirm, Contact + Summary */}
                   {step === "schedule" && (
-                    <motion.div key="schedule" custom={dir} variants={variants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35, ease: "easeInOut" }} className="absolute inset-0">
-                      <h3 className="text-xl md:text-2xl font-bold text-coffee-brown mb-4">Set your delivery schedule</h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md">
-                        {["Every 2 weeks","Every 4 weeks"].map((opt) => (
-                          <RadioCard key={opt} name="schedule" value={opt} checked={data.schedule === opt} onChange={(val) => setData((d) => ({ ...d, schedule: val }))} label={opt} imageSrc="/icons/placeholder.png" />
-                        ))}
+                    <motion.section
+                      key="schedule"
+                      custom={dir}
+                      variants={variants}
+                      initial="enter"
+                      animate="center"
+                      exit="exit"
+                      transition={{ duration: 0.35, ease: "easeInOut" }}
+                      className="absolute inset-0"
+                    >
+                      <header className="mb-4">
+                        <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-coffee-brown">
+                          When should your coffee arrive?
+                        </h3>
+                        <p className="mt-1 text-enzi-db text-sm">
+                          Freshness matters. Tell us how often you want your coffee delivered and we’ll roast it just in time.
+                        </p>
+                      </header>
+
+                      <div className="space-y-6">
+                        <AnimatePresence mode="wait" custom={dir}>
+                          {subStep === "frequency" && (
+                            <motion.fieldset
+                              key="frequency"
+                              custom={dir}
+                              variants={variants}
+                              initial="enter"
+                              animate="center"
+                              exit="exit"
+                              transition={{ duration: 0.35, ease: "easeInOut" }}
+                            >
+                              <legend className="block text-enzi-db text-sm mb-2">Delivery frequency</legend>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md">
+                                {SCHEDULE_OPTIONS.map((opt) => (
+                                  <RadioCard
+                                    key={opt}
+                                    name="schedule"
+                                    value={opt}
+                                    checked={data.schedule === opt}
+                                    onChange={setFieldAndAutoNext("schedule")}  
+                                    label={opt}
+                                  />
+                                ))}
+                              </div>
+                            </motion.fieldset>
+                          )}
+
+                          {subStep === "size" && (
+                            <motion.fieldset
+                              key="size"
+                              custom={dir}
+                              variants={variants}
+                              initial="enter"
+                              animate="center"
+                              exit="exit"
+                              transition={{ duration: 0.35, ease: "easeInOut" }}
+                            >
+                              <legend className="block text-enzi-db text-sm mb-2">Confirm bag size</legend>
+                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-xl">
+                                {SIZE_OPTIONS.map((opt) => (
+                                  <label
+                                    key={opt}
+                                    className={`${cardBase} cursor-pointer flex items-center gap-3`}
+                                  >
+                                    <input
+                                      type="radio"
+                                      name="size"
+                                      value={opt}
+                                      checked={data.size === opt}
+                                      onChange={(e) => setFieldAndAutoNext("size")(e.target.value)}  
+                                      className="h-5 w-5 accent-coffee-gold"
+                                    />
+                                    <span className="text-enzi-db font-medium">{opt}</span>
+                                  </label>
+                                ))}
+                              </div>
+                              {suggestedSize && (
+                                <p className="mt-2 text-sm text-coffee-brown">
+                                  Recommended based on your cups/week: <strong>{suggestedSize}</strong>
+                                </p>
+                              )}
+                            </motion.fieldset>
+                          )}
+
+                          {subStep === "contact" && (
+                            <motion.div
+                              key="contact"
+                              custom={dir}
+                              variants={variants}
+                              initial="enter"
+                              animate="center"
+                              exit="exit"
+                              transition={{ duration: 0.35, ease: "easeInOut" }}
+                              className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+                            >
+                              <div className="col-span-1 sm:col-span-2">
+                                <div className={`${cardBase} bg-white`}>
+                                  <label className="block text-enzi-db text-sm mb-2">Full Name *</label>
+                                  <input
+                                    type="text"
+                                    value={data.fullName}
+                                    onChange={(e) => setField("fullName")(e.target.value)}
+                                    className="w-full bg-transparent outline-none text-enzi-db text-base min-h-[48px] px-1"
+                                    placeholder="e.g., Asha N."
+                                    aria-invalid={data.fullName.trim().length === 0}
+                                  />
+                                </div>
+                              </div>
+
+                              <div>
+                                <div className={`${cardBase} bg-white`}>
+                                  <label className="block text-enzi-db text-sm mb-2">Email *</label>
+                                  <input
+                                    type="email"
+                                    value={data.email}
+                                    onChange={(e) => setField("email")(e.target.value)}
+                                    className="w-full bg-transparent outline-none text-enzi-db text-base min-h-[48px] px-1"
+                                    placeholder="you@example.com"
+                                    autoComplete="email"
+                                    inputMode="email"
+                                    aria-invalid={!!data.email && !emailRegex.test(data.email)}
+                                  />
+                                </div>
+                              </div>
+
+                              <div>
+                                <div className={`${cardBase} bg-white`}>
+                                  <label className="block text-enzi-db text-sm mb-2">Phone (optional)</label>
+                                  <input
+                                    type="tel"
+                                    value={data.phone}
+                                    onChange={(e) => setField("phone")(e.target.value)}
+                                    className="w-full bg-transparent outline-none text-enzi-db text-base min-h-[48px] px-1"
+                                    placeholder="+255 712 345 678"
+                                    autoComplete="tel"
+                                    inputMode="tel"
+                                    aria-invalid={!!data.phone && !phoneRegex.test(data.phone || "")}
+                                  />
+                                </div>
+                              </div>
+                            </motion.div>
+                          )}
+
+                          {subStep === "summary" && (
+                            <motion.div
+                              key="summary"
+                              custom={dir}
+                              variants={variants}
+                              initial="enter"
+                              animate="center"
+                              exit="exit"
+                              transition={{ duration: 0.35, ease: "easeInOut" }}
+                              className="mt-2 bg-white border border-coffee-brown/20 rounded-2xl p-4"
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <h4 className="font-semibold text-coffee-brown">Summary</h4>
+                                <div className="flex gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => toStep("cups")}
+                                    className="text-sm underline text-enzi-db hover:text-enzi-db"
+                                  >
+                                    Edit cups
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => toStep("brew")}
+                                    className="text-sm underline text-enzi-db hover:text-enzi-db"
+                                  >
+                                    Edit brew & taste
+                                  </button>
+                                </div>
+                              </div>
+                              <ul className="text-sm text-enzi-db grid grid-cols-1 sm:grid-cols-2 gap-y-1">
+                                <li><strong>Cups/week:</strong> {data.cupsRange || "—"}</li>
+                                <li><strong>Brew:</strong> {data.brewMethod || "—"}</li>
+                                <li><strong>Flavour:</strong> {data.flavorProfile || "—"}</li>
+                                <li><strong>Grind:</strong> {data.grindPref}{data.autoGrindNote ? ` — ${data.autoGrindNote}` : ""}</li>
+                                <li><strong>Bag size:</strong> {data.size || "—"}</li>
+                                <li><strong>Frequency:</strong> {data.schedule || "—"}</li>
+                              </ul>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </div>
-                    </motion.div>
-                  )}
-
-                  {step === "contact" && (
-                    <motion.div key="contact" custom={dir} variants={variants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35, ease: "easeInOut" }} className="absolute inset-0">
-                      <h3 className="text-xl md:text-2xl font-bold text-coffee-brown mb-4">Contact Details</h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="col-span-1 sm:col-span-2">
-                          <div className={`${cardBase} bg-white`}>
-                            <label className="block text-enzi-db/70 text-sm mb-1">Full Name</label>
-                            <input type="text" value={data.fullName} onChange={(e) => setData((d) => ({ ...d, fullName: e.target.value }))} className="w-full bg-transparent outline-none text-enzi-db" placeholder="e.g., Asha N." />
-                          </div>
-                        </div>
-
-                        <div>
-                          <div className={`${cardBase} bg-white`}>
-                            <label className="block text-enzi-db/70 text-sm mb-1">Email</label>
-                            <input type="email" value={data.email} onChange={(e) => setData((d) => ({ ...d, email: e.target.value }))} className="w-full bg-transparent outline-none text-enzi-db" placeholder="you@example.com" />
-                          </div>
-                        </div>
-
-                        <div>
-                          <div className={`${cardBase} bg-white`}>
-                            <label className="block text-enzi-db/70 text-sm mb-1">Phone (optional)</label>
-                            <input type="tel" value={data.phone} onChange={(e) => setData((d) => ({ ...d, phone: e.target.value }))} className="w-full bg-transparent outline-none text-enzi-db" placeholder="+255 712 345 678" />
-                          </div>
-                        </div>
-
-                        <div className="sm:col-span-2 text-sm text-coffee-brown/80">
-                          {!data.fullName && <div>• Name is required</div>}
-                          {!!data.email && !emailRegex.test(data.email) && <div>• Enter a valid email</div>}
-                          {!!data.phone && !phoneRegex.test(data.phone) && <div>• Enter a valid phone number</div>}
-                        </div>
-                      </div>
-                    </motion.div>
+                    </motion.section>
                   )}
                 </AnimatePresence>
               </div>
 
-              <div className="mt-8 flex items-center justify-between">
-                <button onClick={back} disabled={index === 0} className="inline-flex items-center gap-2 rounded-xl border border-enzi-db/30 px-5 py-3 text-enzi-db disabled:opacity-40 bg-white">
+              {/* Nav buttons */}
+              <div className="mt-6 sm:mt-8 flex items-center justify-between">
+                <button
+                  onClick={back}
+                  disabled={index === 0 && subStepsMap[step].indexOf(subStep) === 0}
+                  className="inline-flex items-center gap-2 rounded-xl border border-enzi-db/30 px-4 py-3 sm:px-5 sm:py-3 text-enzi-db disabled:opacity-40 bg-white min-h-[48px]"
+                >
                   ← Back
                 </button>
 
-                {index < total - 1 ? (
-                  <button onClick={next} disabled={!isValid} className="inline-flex items-center gap-2 rounded-xl px-6 py-3 font-semibold text-white bg-coffee-gold hover:bg-coffee-brown disabled:opacity-50">
-                    Next →
-                  </button>
-                ) : (
-                  <button onClick={next} disabled={!isValid} className="inline-flex items-center gap-2 rounded-xl px-6 py-3 font-semibold text-white bg-coffee-gold hover:bg-coffee-brown disabled:opacity-50">
-                    Submit
-                  </button>
-                )}
+                <button
+                  onClick={next}
+                  disabled={
+                    !isValid ||
+                    (index === total - 1 &&
+                      subStepsMap[step].indexOf(subStep) === subStepsMap[step].length - 1 &&
+                      submitting)
+                  }
+                  className="inline-flex items-center gap-2 rounded-xl px-5 py-3 sm:px-6 sm:py-3 font-semibold text-white bg-coffee-gold hover:bg-coffee-brown disabled:opacity-50 min-h-[48px]"
+                >
+                  {index === total - 1 && subStepsMap[step].indexOf(subStep) === subStepsMap[step].length - 1
+                    ? (submitting ? "Submitting…" : "Subscribe Now")
+                    : "Next →"}
+                </button>
               </div>
             </div>
 
-            <p className="mt-4 text-xs text-enzi-db/60 text-center">By continuing you agree to receive emails about your subscription. You can unsubscribe anytime.</p>
+            <p className="mt-4 text-xs text-enzi-db/80 text-center">
+              {/* You’re joining Harakati za Enzi, a movement that honours every hand along the way. Expect a confirmation email, and let us know if your tastes evolve; we’re here to guide you. */}
+              Join Harakati za Enzi, a movement that honours every hand along the way.  
+              <br />
+              {/* With love, Harakati za Enzi */}
+            </p>
           </div>
         </motion.div>
       </motion.div>
@@ -317,58 +830,3 @@ function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
   );
 }
 
-interface SubscriptionProps {
-  isModalOpen: boolean;
-  onOpenModal: () => void;
-  onCloseModal: () => void;
-}
-
-export default function Subscription({ isModalOpen, onOpenModal, onCloseModal }: SubscriptionProps) {
-  const [showFAB, setShowFAB] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const documentHeight = document.documentElement.scrollHeight;
-
-      // Show FAB when user has scrolled 40% of the page
-      const showPoint = documentHeight * 0.4;
-
-      if (scrollY > showPoint) {
-        setShowFAB(true);
-      } else {
-        setShowFAB(false);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  return (
-    <>
-      {/* Floating Action Button */}
-      <AnimatePresence>
-        {showFAB && (
-          <motion.button
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={onOpenModal}
-            className="fixed bottom-6 right-6 z-40 px-6 py-3 bg-coffee-gold hover:bg-coffee-brown text-white rounded-full shadow-lg font-medium text-sm transition-colors"
-            title="Subscribe to coffee"
-          >
-            Subscribe Now
-          </motion.button>
-        )}
-      </AnimatePresence>
-
-      <SubscriptionModal
-        isOpen={isModalOpen}
-        onClose={onCloseModal}
-      />
-    </>
-  );
-}

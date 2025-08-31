@@ -81,14 +81,14 @@ export function ReviewsCarousel({
           <button
             aria-label="Previous review"
             onClick={prev}
-            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 rounded-full border border-enzi-db/30 bg-white/70 backdrop-blur px-3 py-2 hover:bg-white"
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 rounded-full border border-enzi-db/30 bg-white/70 backdrop-blur px-4 py-3 hover:bg-white min-h-[48px] min-w-[48px] flex items-center justify-center"
           >
             ‹
           </button>
           <button
             aria-label="Next review"
             onClick={next}
-            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 rounded-full border border-enzi-db/30 bg-white/70 backdrop-blur px-3 py-2 hover:bg-white"
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 rounded-full border border-enzi-db/30 bg-white/70 backdrop-blur px-4 py-3 hover:bg-white min-h-[48px] min-w-[48px] flex items-center justify-center"
           >
             ›
           </button>

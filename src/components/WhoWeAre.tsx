@@ -9,12 +9,12 @@ interface WhoWeAreProps {
  
 export default function WhoWeAre({
   eyebrow = "WHO WE ARE",
-  heading = "From our hands to yours, Harakati na Enzi.",
+  heading = "Coffee with Purpose: Join the Movement.",
   body =
-    "Harakati was founded to create dignified work, especially for young Tanzanians often excluded from meaningful opportunity. Their barista and life-skills training programs have already reshaped dozens of lives, treating work as a redemptive calling. Enzi elevates everyone in the value chain from the woman farmer in Mbeya to the barista in Dar. We believe a well-poured cup is a form of service, and everyone who touches that process deserves dignity.",
+    "At Harakati za ENZI, coffee is never just coffee. It’s a shared journey, from farmers in Tanzania to your cup, built on respect and artistry.  We’ve combined the innovative spirit of ENZI and the redemptive heart of Harakati to create a home for Tanzanian specialty coffee lovers.",
 }: WhoWeAreProps) {
   return (
-    <section id="about" className="relative py-16 sm:py-20 lg:py-24 bg-white">
+    <section id="who-we-are" className="relative py-16 sm:py-20 lg:py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-6 sm:mb-8">
           <span className="text-enzi-db/80 text-sm font-['RoobertRegular'] tracking-[0.15em] uppercase">
