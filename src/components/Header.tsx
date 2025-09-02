@@ -10,7 +10,7 @@ interface HeaderProps {
 export default function Header({
   instagramUrl = "https://instagram.com/your-handle",
   xUrl = "https://x.com/your-handle",
-  logoSrc = "/src/assets/Hze-logo.png",
+  logoSrc = "/assets/Hze-logo.png",
 }: HeaderProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [open, setOpen] = useState(false);
@@ -54,7 +54,7 @@ export default function Header({
         <div className="flex items-center justify-between h-10">
           {/* Mobile menu button (left) */}
           <button
-            className="md:hidden inline-flex items-center justify-center rounded-xl p-3 text-enzi-db hover:text-coffee-gold focus:outline-none min-h-[48px] min-w-[48px]"
+            className="md:hidden inline-flex items-center justify-center p-3 text-enzi-db hover:text-coffee-gold focus:outline-none min-h-[48px] min-w-[48px]"
             aria-label="Toggle menu"
             onClick={() => setOpen((v) => !v)}
           >
@@ -110,7 +110,7 @@ export default function Header({
             <img
               src={logoSrc}
               alt="Harakati za Enzi Roastery Logo"
-              className="h-12 sm:h-14 md:h-16 w-auto select-none"
+              className="h-12 sm:h-14 md:h-16 w-auto select-none scale-[1.02]"
             />
           </a>
         </div>
@@ -137,7 +137,7 @@ export default function Header({
           open ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
         }`}
       >
-        <nav className="mx-4 mb-3 rounded-2xl border border-coffee-brown/20 bg-white shadow-sm">
+  <nav className="mx-4 mb-3 border border-coffee-brown/20 bg-white shadow-sm">
           {nav.map((item) => (
             <a
               key={item.name}

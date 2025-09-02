@@ -21,7 +21,7 @@ export default function OurStory({
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center max-w-screen-2xl mx-auto">
            <div className="lg:col-span-7 xl:col-span-6">
-            <div className="rounded-[36px] overflow-hidden shadow-sm border border-coffee-brown/15">
+            <div className="overflow-hidden shadow-sm border border-coffee-brown/15">
               <img
                 src={imageSrc}
                 alt={imageAlt}
