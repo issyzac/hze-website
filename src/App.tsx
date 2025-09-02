@@ -86,7 +86,7 @@ function App() {
         {/* Success Message */}
         {showSuccessMessage && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl shadow-2xl border border-coffee-brown/15 p-8 max-w-md mx-auto text-center">
+            <div className="bg-white shadow-2xl border border-coffee-brown/15 p-8 max-w-md mx-auto text-center">
               <h3 className="text-xl font-bold text-coffee-brown mb-4">Welcome to Harakati za Enzi!</h3>
               <p className="text-enzi-db">
                 You’re joining Harakati za Enzi, a movement that honours every hand along the way. Expect a confirmation email, and let us know if your tastes evolve; we’re here to guide you.

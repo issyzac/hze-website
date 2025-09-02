@@ -56,11 +56,11 @@ export default function AboutUs({
             </p>
           </div>
            <div className="lg:col-span-6">
-            <div className="rounded-[36px] overflow-hidden shadow-sm border border-coffee-brown/15">
+            <div className="overflow-hidden shadow-sm border border-coffee-brown/15">
               <img
                 src={imageSrc}
                 alt={imageAlt}
-                className="w-full h-full max-h-[560px] object-cover"
+                className="w-full h-full max-h-[560px] object-cover scale-[1.05]"
               />
             </div>
           </div> 

@@ -24,7 +24,7 @@ const ProductHighlights: React.FC<ProductHighlightsProps> = ({ products = [] }) 
           {products.map((product) => (
             <article
               key={(product as any).id ?? (product as any).sku ?? (product as any).name}
-              className="rounded-3xl bg-[#F1EEE8] p-6 sm:p-7 md:p-8 flex flex-col shadow-sm"
+              className="bg-[#F1EEE8] p-6 sm:p-7 md:p-8 flex flex-col shadow-sm"
             >
               {/* Title */}
               <h3 className="text-coffee-brown font-['GTAlpinaThin'] text-2xl md:text-[28px] leading-tight mb-4">
@@ -36,7 +36,7 @@ const ProductHighlights: React.FC<ProductHighlightsProps> = ({ products = [] }) 
                 <img
                   src={(product as any).image}
                   alt={(product as any).name}
-                  className="max-h-60 object-contain"
+                  className="max-h-60 object-contain scale-[1.02]"
                   loading="lazy"
                   onError={(e) => {
                     const t = e.target as HTMLImageElement;
@@ -62,7 +62,7 @@ const ProductHighlights: React.FC<ProductHighlightsProps> = ({ products = [] }) 
                 </div>
                 <div className="col-span-12 md:col-span-4 md:justify-self-end">
                   <button
-                    className="inline-flex items-center justify-center whitespace-nowrap rounded-full border border-enzi-db/60 px-5 py-3 sm:px-4 sm:py-2 text-base sm:text-sm font-['RoobertRegular'] text-enzi-db hover:bg-white w-full md:w-auto min-h-[48px]"
+                    className="inline-flex items-center justify-center whitespace-nowrap border border-enzi-db/60 px-5 py-3 sm:px-4 sm:py-2 text-base sm:text-sm font-['RoobertRegular'] text-enzi-db hover:bg-white w-full md:w-auto min-h-[48px]"
                     onClick={() => {
                       const el = document.getElementById("products");
                       if (el) {

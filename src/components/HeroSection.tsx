@@ -34,7 +34,7 @@ export default function HeroSection({
     <section id="home" className="relative pt-30 sm:pt-48 mt-12 pb-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div
-          className="relative overflow-hidden rounded-[28px] sm:rounded-[32px] lg:rounded-[36px] shadow-sm border border-coffee-brown/15"
+          className="relative overflow-hidden shadow-sm border border-coffee-brown/15 scale-[1.10]"
           style={{
             backgroundImage: `url(${bg})`,
             backgroundSize: "cover",
@@ -58,7 +58,7 @@ export default function HeroSection({
             <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-center gap-4">
               <button
                 onClick={onSubscribe}
-                className="inline-flex items-center justify-center px-6 py-4 sm:px-8 sm:py-4 text-base sm:text-lg font-['RoobertRegular'] text-white bg-coffee-gold hover:bg-coffee-gold/90 rounded-2xl shadow-sm transition-colors min-h-[56px] w-full sm:w-auto"
+                className="inline-flex items-center justify-center px-6 py-4 sm:px-8 sm:py-4 text-base sm:text-lg font-['RoobertRegular'] text-white bg-coffee-gold hover:bg-coffee-gold/90 shadow-sm transition-colors min-h-[56px] w-full sm:w-auto"
               >
                 {ctaText}
               </button>
@@ -74,7 +74,7 @@ export default function HeroSection({
                       }
                     }}
                     
-                className="inline-flex items-center justify-center px-6 py-4 sm:px-8 sm:py-4 text-base sm:text-lg font-['RoobertRegular'] border-2 border-white/80 text-white hover:bg-white/10 rounded-2xl transition-colors min-h-[56px] w-full sm:w-auto"
+                className="inline-flex items-center justify-center px-6 py-4 sm:px-8 sm:py-4 text-base sm:text-lg font-['RoobertRegular'] border-2 border-white/80 text-white hover:bg-white/10 transition-colors min-h-[56px] w-full sm:w-auto"
               >
                 Discover Your Flavor
               </button>
@@ -83,8 +83,8 @@ export default function HeroSection({
         </div>
 
         <div className="mt-8 flex justify-center">
-          <div className="w-7 h-12 border-2 border-coffee-brown/60 rounded-full flex justify-center items-start">
-            <div className="w-1.5 h-3 mt-2 bg-coffee-brown/80 rounded-full animate-bounce" />
+          <div className="w-7 h-12 border-2 border-coffee-brown/60 flex justify-center items-start">
+            <div className="w-1.5 h-3 mt-2 bg-coffee-brown/80 animate-bounce" />
           </div>
         </div>
       </div>

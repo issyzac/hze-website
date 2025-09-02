@@ -43,7 +43,7 @@ const emailRegex = /[^\s@]+@[^\s@]+\.[^\s@]+/;
 const phoneRegex = /^[+]?[\d ()-]{6,20}$/;
 
 const cardBase =
-  "rounded-2xl border border-coffee-brown/20 bg-[#F7F3ED] px-4 py-3 md:px-6 md:py-4 transition transform hover:scale-[1.02] focus-within:ring-2 focus-within:ring-coffee-gold/50";
+  "border border-coffee-brown/20 bg-[#F7F3ED] px-4 py-3 md:px-6 md:py-4 transition transform hover:scale-[1.02] focus-within:ring-2 focus-within:ring-coffee-gold/50";
 
 const CUP_OPTIONS: CupsRange[] = ["Up to 4", "4–8", "8–12"];
 const BREW_OPTIONS: BrewMethod[] = ["Espresso", "Pour-Over", "French Press", "Cold Brew"];
@@ -138,7 +138,7 @@ function Progress({ stepIndex, total }: { stepIndex: number; total: number }) {
   const percent = Math.round(((stepIndex + 1) / total) * 100);
   return (
     <div className="w-full mb-6">
-      <div className="h-2 w-full bg-enzi-db/10 rounded-full overflow-hidden" aria-hidden="true">
+  <div className="h-2 w-full bg-enzi-db/10 overflow-hidden" aria-hidden="true">
         <motion.div
           className="h-2 bg-coffee-gold"
           initial={{ width: 0 }}
@@ -405,7 +405,7 @@ export default function SubscriptionWizard({
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
           transition={motionTransition}
-          className="relative max-w-2xl w-full max-h-[90vh] overflow-y-auto bg-white rounded-3xl shadow-2xl border border-coffee-brown/15 mx-4 sm:mx-6"
+          className="relative max-w-2xl w-full max-h-[90vh] overflow-y-auto bg-white shadow-2xl border border-coffee-brown/15 mx-4 sm:mx-6"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Close */}

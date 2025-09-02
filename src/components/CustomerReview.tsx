@@ -81,14 +81,14 @@ export function ReviewsCarousel({
           <button
             aria-label="Previous review"
             onClick={prev}
-            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 rounded-full border border-enzi-db/30 bg-white/70 backdrop-blur px-4 py-3 hover:bg-white min-h-[48px] min-w-[48px] flex items-center justify-center"
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 border border-enzi-db/30 bg-white/70 backdrop-blur px-4 py-3 hover:bg-white min-h-[48px] min-w-[48px] flex items-center justify-center"
           >
             ‹
           </button>
           <button
             aria-label="Next review"
             onClick={next}
-            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 rounded-full border border-enzi-db/30 bg-white/70 backdrop-blur px-4 py-3 hover:bg-white min-h-[48px] min-w-[48px] flex items-center justify-center"
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 border border-enzi-db/30 bg-white/70 backdrop-blur px-4 py-3 hover:bg-white min-h-[48px] min-w-[48px] flex items-center justify-center"
           >
             ›
           </button>
@@ -104,7 +104,7 @@ export function ReviewsCarousel({
             {reviews.map((r) => (
               <figure
                 key={r.id}
-                className="coffee-card snap-center p-8 rounded-3xl bg-[#F7F3ED] border border-coffee-brown/15 shadow-sm"
+                className="coffee-card snap-center p-8 bg-[#F7F3ED] border border-coffee-brown/15 shadow-sm"
               >
                 <div className="flex items-center gap-3 mb-4">
                   <div className="flex items-center gap-1" aria-label={`${r.rating} out of 5`}>
@@ -135,7 +135,7 @@ export function ReviewsCarousel({
                 key={i}
                 aria-label={`Go to slide ${i + 1}`}
                 onClick={() => setIndex(i)}
-                className={`h-2.5 w-2.5 rounded-full ${i === index ? "bg-coffee-gold" : "bg-enzi-db/20"}`}
+                className={`h-2.5 w-2.5 ${i === index ? "bg-coffee-gold" : "bg-enzi-db/20"}`}
               />
             ))}
           </div>
