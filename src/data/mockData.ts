@@ -2,80 +2,65 @@ import type {
   RoastedCoffeeBeanProduct, 
   CustomerReview, 
   Bundle, 
-  ProductHighlight,
   SuperFeature,
   SocialLink
 } from '../types';
 
 // Mock coffee products data
-export const mockProducts: RoastedCoffeeBeanProduct[] = [
+export const mockProducts: RoastedCoffeeBeanProduct[] = [ 
   {
     id: '1',
-    name: 'Harakati Original Blend',
-    description: 'Our signature medium roast with notes of chocolate and caramel',
-    image: '/images/original-blend.jpg',
-    price: 18.99,
-    category: 'original',
-    roastLevel: 'medium',
-    origin: 'Tanzania',
-    flavorNotes: ['chocolate', 'caramel', 'nutty'],
-    weight: '12oz',
-    grindType: 'whole-bean',
-    caffeineContent: 'regular',
-    processingMethod: 'washed',
-    roastDate: '2024-01-15',
-    certifications: ['organic', 'fair-trade']
-  },
-  {
-    id: '2',
-    name: 'Hazelnut Delight',
+    name: 'Nguvu',
     description: 'Smooth medium roast infused with natural hazelnut flavoring',
-    image: '/images/hazelnut-blend.jpg',
-    price: 19.99,
-    category: 'hazelnut',
+    image: '/assets/images/nguvu.PNG',
+    price: '18,000',
+    category: 'Nguvu',
     roastLevel: 'medium',
     origin: 'Tanzania',
     flavorNotes: ['hazelnut', 'vanilla', 'smooth'],
-    weight: '12oz',
+    weight: '250g',
     grindType: 'whole-bean',
     caffeineContent: 'regular',
     processingMethod: 'natural',
     roastDate: '2024-01-15',
-    certifications: ['organic']
+    certifications: ['organic'],
+    backgroundColor: '#E3E3E3'
   },
   {
-    id: '3',
-    name: 'Vanilla Dream',
+    id: '2',
+    name: 'Tunu',
     description: 'Rich dark roast with subtle vanilla undertones',
-    image: '/images/vanilla-blend.jpg',
-    price: 19.99,
-    category: 'vanilla',
+    image: '/assets/images/tunu.PNG',
+    price: '22,000',
+    category: 'Tunu',
     roastLevel: 'dark',
     origin: 'Tanzania',
     flavorNotes: ['vanilla', 'rich', 'bold'],
-    weight: '12oz',
+    weight: '250g',
     grindType: 'whole-bean',
     caffeineContent: 'regular',
     processingMethod: 'honey',
     roastDate: '2024-01-15',
-    certifications: ['organic', 'fair-trade']
+    certifications: ['organic', 'fair-trade'],
+    backgroundColor: '#E3E3E3'
   },
   {
-    id: '4',
-    name: 'Decaf Harmony',
+    id: '3',
+    name: 'Amka',
     description: 'Full-bodied decaffeinated blend without compromising taste',
-    image: '/images/decaf-blend.jpg',
-    price: 17.99,
-    category: 'decaf',
+    image: '/assets/images/amka.jpeg',
+    price: '15,000',
+    category: 'Amka',
     roastLevel: 'medium',
     origin: 'Tanzania',
     flavorNotes: ['balanced', 'smooth', 'mild'],
-    weight: '12oz',
+    weight: '250g',
     grindType: 'whole-bean',
     caffeineContent: 'decaf',
     processingMethod: 'washed',
     roastDate: '2024-01-15',
-    certifications: ['organic']
+    certifications: ['organic'],
+    backgroundColor: '#E3E3E3'
   }
 ];
 
@@ -148,35 +133,7 @@ export const mockBundle: Bundle = {
     '/images/coffee-variety.jpg',
     '/images/bundle-contents.jpg'
   ]
-};
-
-// Mock product highlights for the highlights section
-export const mockProductHighlights: ProductHighlight[] = [
-  {
-    id: '1',
-    name: 'Original Blend',
-    description: 'Our signature medium roast with rich chocolate and caramel notes',
-    image: '/assets/images/coffee-bag-WEaa66D-600.png'
-  },
-  {
-    id: '2',
-    name: 'Hazelnut Delight',
-    description: 'Smooth medium roast with natural hazelnut flavoring',
-    image: '/assets/images/coffee-bag-WEaa66D-600.png'
-  },
-  {
-    id: '3',
-    name: 'Vanilla Dream',
-    description: 'Rich dark roast with subtle vanilla undertones',
-    image: '/assets/images/coffee-bag-WEaa66D-600.png'
-  },
-  {
-    id: '4',
-    name: 'Decaf Harmony',
-    description: 'Full-bodied decaf without compromising on taste',
-    image: '/assets/images/coffee-bag-WEaa66D-600.png'
-  }
-];
+}; 
 
 // Mock super features for "What Makes It Super" section
 export const mockSuperFeatures: SuperFeature[] = [

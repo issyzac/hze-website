@@ -2,29 +2,19 @@
 
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { AnimatePresence, motion, type Transition } from "framer-motion";
+import { useSubscriptionForm } from "../hooks/useSubscriptionForm";
+import { type CupsRange, type BrewMethod, type GrindPref, type Schedule } from "../data/contact";
 
 // ------------------------------------------------------
 // Types
 // ------------------------------------------------------
-type CupsRange = "Up to 4" | "4–8" | "8–12";
-type BrewMethod = "Espresso" | "Pour-Over" | "French Press" | "Cold Brew";
-type FlavorProfile =
-  | "Bright & Fruity"
-  | "Nutty & Chocolatey"
-  | "Balanced & Smooth"
-  | "Surprise me!";
-type GrindPref = "Whole Bean" | "Ground";
-type Size = "250g" | "500g" | "1kg";
-type Schedule = "Every 2 weeks" | "Every 4 weeks";
-
 interface SubscriptionData {
   cupsRange: CupsRange | "";
+  customCups?: number;
   brewMethod: BrewMethod | "";
-  flavorProfile: FlavorProfile | "";
   grindPref: GrindPref | "";
-  autoGrindNote?: string;  
+  autoGrindNote?: string;
   schedule: Schedule | "";
-  size: Size | "";  
   fullName: string;
   email: string;
   phone?: string;
@@ -33,7 +23,6 @@ interface SubscriptionData {
 interface SubscriptionWizardProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit?: (data: SubscriptionData) => Promise<void> | void;
 }
 
 // ------------------------------------------------------
@@ -45,16 +34,9 @@ const phoneRegex = /^[+]?[\d ()-]{6,20}$/;
 const cardBase =
   "border border-coffee-brown/20 bg-[#F7F3ED] px-4 py-3 md:px-6 md:py-4 transition transform hover:scale-[1.02] focus-within:ring-2 focus-within:ring-coffee-gold/50";
 
-const CUP_OPTIONS: CupsRange[] = ["Up to 4", "4–8", "8–12"];
+const CUP_OPTIONS: CupsRange[] = ["1 to 2", "2 to 4", "5 - 7", "Others"];
 const BREW_OPTIONS: BrewMethod[] = ["Espresso", "Pour-Over", "French Press", "Cold Brew"];
-const FLAVOR_OPTIONS: FlavorProfile[] = [
-  "Bright & Fruity",
-  "Nutty & Chocolatey",
-  "Balanced & Smooth",
-  "Surprise me!",
-];
 const GRIND_OPTIONS: GrindPref[] = ["Whole Bean", "Ground"];
-const SIZE_OPTIONS: Size[] = ["250g", "500g", "1kg"];
 const SCHEDULE_OPTIONS: Schedule[] = ["Every 2 weeks", "Every 4 weeks"];
 
 const brewToGrindMap: Record<BrewMethod, string> = {
@@ -64,16 +46,58 @@ const brewToGrindMap: Record<BrewMethod, string> = {
   "Cold Brew": "Extra-coarse grind for steeping",
 };
 
-function recommendSize(cupsRange: CupsRange | ""): Size | "" {
+function calculateRecommendedSize(cupsPerDay: number, frequency: Schedule): string {
+  const gramsPerCup = 20;
+  const daysInPeriod = frequency === "Every 2 weeks" ? 14 : 28;
+  
+  const totalGramsNeeded = cupsPerDay * gramsPerCup * daysInPeriod;
+  
+  const totalWithBuffer = Math.ceil(totalGramsNeeded * 1.15);
+  
+  const availableSizes = [250, 500, 1000, 2000, 3000, 5000, 10000, 15000, 20000, 25000];
+  
+  const recommendedSizeGrams = availableSizes.find(size => size >= totalWithBuffer) || 
+     Math.ceil(totalWithBuffer / 25000) * 25000;
+  
+   if (recommendedSizeGrams >= 1000) {
+    if (recommendedSizeGrams % 1000 === 0) {
+      return `${recommendedSizeGrams / 1000}kg`;
+    } else {
+      return `${(recommendedSizeGrams / 1000).toFixed(1)}kg`;
+    }
+  } else {
+    return `${recommendedSizeGrams}g`;
+  }
+}
+
+function getCupsPerDay(cupsRange: CupsRange | "", customCups?: number): number {
+  if (cupsRange === "Others" && customCups !== undefined && customCups > 0) {
+    return customCups;
+  }
+  
   switch (cupsRange) {
-    case "Up to 4":
-      return "250g";
-    case "4–8":
-      return "500g";
-    case "8–12":
-      return "1kg"; 
-    default:
-      return "";
+    case "1 to 2": return 1.5;   
+    case "2 to 4": return 3;     
+    case "5 - 7": return 6; 
+    default: return 2;           
+  }
+}
+
+function getSmartDescription(cupsPerDay: number): string {
+  if (cupsPerDay <= 2) {
+    return "Perfect for occasional coffee moments";
+  } else if (cupsPerDay <= 4) {
+    return "Ideal for daily coffee routine";
+  } else if (cupsPerDay <= 8) {
+    return "Great for coffee lovers & small teams";
+  } else if (cupsPerDay <= 15) {
+    return "Perfect for offices & heavy users";
+  } else if (cupsPerDay <= 30) {
+    return "Ideal for medium businesses & cafes";
+  } else if (cupsPerDay <= 60) {
+    return "Perfect for large offices & coffee shops";
+  } else {
+    return "Enterprise solution for high-volume needs";
   }
 }
 
@@ -159,15 +183,15 @@ function Progress({ stepIndex, total }: { stepIndex: number; total: number }) {
 export default function SubscriptionWizard({
   isOpen,
   onClose,
-  onSubmit,
 }: SubscriptionWizardProps) {
+  const { mutation } = useSubscriptionForm();
   const steps = ["cups", "brew", "schedule"] as const;
   type StepKey = typeof steps[number];
 
   const subStepsMap: Record<StepKey, string[]> = {
     cups: ["cups"],
-    brew: ["brewMethod", "flavor", "grind"],
-    schedule: ["frequency", "size", "contact", "summary"],
+    brew: ["brewMethod", "grind"],
+    schedule: ["frequency", "contact", "summary"],
   };
 
   const [step, setStep] = useState<StepKey>("cups");
@@ -178,12 +202,11 @@ export default function SubscriptionWizard({
 
   const [data, setData] = useState<SubscriptionData>({
     cupsRange: "",
+    customCups: undefined,
     brewMethod: "",
-    flavorProfile: "",
     grindPref: "",
     autoGrindNote: "",
     schedule: "",
-    size: "",
     fullName: "",
     email: "",
     phone: "",
@@ -204,12 +227,11 @@ export default function SubscriptionWizard({
       setSubStep("cups");
       setData({
         cupsRange: "",
+        customCups: undefined,
         brewMethod: "",
-        flavorProfile: "",
         grindPref: "",
         autoGrindNote: "",
         schedule: "",
-        size: "",
         fullName: "",
         email: "",
         phone: "",
@@ -245,9 +267,11 @@ export default function SubscriptionWizard({
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [isOpen, onClose]);
 
-  // derived values
-  const showCupsNote = !!data.cupsRange;
-  const suggestedSize = useMemo(() => recommendSize(data.cupsRange), [data.cupsRange]);
+  useEffect(() => {
+    if (mutation.isSuccess) {
+      onClose();
+    }
+  }, [mutation.isSuccess, onClose]);
 
   useEffect(() => {
     if (data.grindPref === "Ground" && data.brewMethod) {
@@ -260,18 +284,19 @@ export default function SubscriptionWizard({
   const isValid = useMemo(() => {
     switch (step) {
       case "cups":
+        if (data.cupsRange === "Others") {
+          return data.customCups !== undefined && data.customCups > 0;
+        }
         return !!data.cupsRange;
       case "brew":
         switch (subStep) {
           case "brewMethod": return !!data.brewMethod;
-          case "flavor": return !!data.flavorProfile;
           case "grind": return !!data.grindPref;
           default: return false;
         }
       case "schedule":
         switch (subStep) {
           case "frequency": return !!data.schedule;
-          case "size": return !!data.size;
           case "contact": {
             const nameOk = data.fullName.trim().length > 0;
             const emailOk = emailRegex.test(data.email);
@@ -326,16 +351,23 @@ export default function SubscriptionWizard({
     }
   };
 
-  const [submitting, setSubmitting] = useState(false);
   const submit = async () => {
     if (!isValid || index !== total - 1) return;
-    try {
-      setSubmitting(true);
-      await onSubmit?.(data);
-      onClose();
-    } finally {
-      setSubmitting(false);
-    }
+
+    // Convert component data to hook format
+    const formData = {
+      cupsRange: data.cupsRange as CupsRange,
+      customCups: data.customCups,
+      brewMethod: data.brewMethod as BrewMethod,
+      grindPref: data.grindPref as GrindPref,
+      schedule: data.schedule as Schedule,
+      fullName: data.fullName,
+      email: data.email,
+      phone: data.phone,
+    };
+
+    // Use mutation directly to submit the data
+    mutation.mutate(formData);
   };
 
   // NEW: helper to auto-advance after setting a selection
@@ -446,10 +478,10 @@ export default function SubscriptionWizard({
                     >
                       <header className="mb-4">
                         <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-coffee-brown">
-                          How many cups do you enjoy each week?
+                          How many cups do you enjoy each day?
                         </h3>
                         <p className="mt-1 text-enzi-db text-sm">
-                          Every journey starts with you. Tell us roughly how much coffee fuels your days, and we’ll recommend the right bag size and frequency.
+                          Every journey starts with you. Tell us roughly how much coffee fuels your day.
                         </p>
                       </header>
 
@@ -469,11 +501,31 @@ export default function SubscriptionWizard({
                         </div>
                       </fieldset>
 
-                      {showCupsNote && (
-                        <div className="mt-4 text-sm text-coffee-brown/90 bg-white border border-coffee-brown/20 rounded-xl p-3">
-                          Suggested size: <strong className="font-['RoobertBold']">{suggestedSize} per month</strong> based on your pace. You can adjust later.
-                        </div>
+                      {data.cupsRange === "Others" && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.3 }}
+                          className="mt-4"
+                        >
+                          <div className="flex items-center gap-3">
+                            <label className="text-enzi-db text-sm whitespace-nowrap">How many cups per day?</label>
+                            <input
+                              type="number"
+                              min="1"
+                              value={data.customCups || ""}
+                              onChange={(e) => {
+                                const value = parseInt(e.target.value, 10);
+                                setData((d) => ({ ...d, customCups: isNaN(value) ? undefined : value }));
+                              }}
+                              className="w-20 px-2 py-1 border border-coffee-brown/20 rounded-md bg-white text-enzi-db text-sm outline-none focus:ring-2 focus:ring-coffee-gold/50"
+                              placeholder="6"
+                            />
+                          </div>
+                        </motion.div>
                       )}
+
                     </motion.section>
                   )}
 
@@ -491,10 +543,14 @@ export default function SubscriptionWizard({
                     >
                       <header className="mb-4">
                         <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-coffee-brown">
-                          How do you like to brew and taste your coffee?
+                          {subStep === "brewMethod"
+                            ? "How do you like to brew your coffee?"
+                            : "What's your preferred grind?"}
                         </h3>
                         <p className="mt-1 text-enzi-db text-sm">
-                          Tell us how you brew and what flavours you love, and we’ll select the perfect roast and grind on your behalf. You’re one step away from a cup that feels made just for you.
+                          {subStep === "brewMethod"
+                            ? "Tell us how you brew and we'll select the perfect roast and grind on your behalf. You're one step away from a cup that feels made just for you."
+                            : "Choose between whole beans for maximum freshness or pre-ground coffee matched to your brewing method."}
                         </p>
                       </header>
 
@@ -518,43 +574,8 @@ export default function SubscriptionWizard({
                                     name="brewMethod"
                                     value={opt}
                                     checked={data.brewMethod === opt}
-                                    onChange={setFieldAndAutoNext("brewMethod")} // CHANGED
+                                    onChange={setFieldAndAutoNext("brewMethod")} 
                                     label={opt}
-                                  />
-                                ))}
-                              </div>
-                            </motion.fieldset>
-                          )}
-
-                          {subStep === "flavor" && (
-                            <motion.fieldset
-                              key="flavor"
-                              custom={dir}
-                              variants={variants}
-                              initial="enter"
-                              animate="center"
-                              exit="exit"
-                              transition={{ duration: 0.35, ease: "easeInOut" }}
-                            >
-                              <legend className="block text-enzi-db text-sm mb-2">Flavour profile</legend>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                {FLAVOR_OPTIONS.map((opt) => (
-                                  <RadioCard
-                                    key={opt}
-                                    name="flavorProfile"
-                                    value={opt}
-                                    checked={data.flavorProfile === opt}
-                                    onChange={setFieldAndAutoNext("flavorProfile")}  
-                                    label={opt}
-                                    description={
-                                      opt === "Bright & Fruity"
-                                        ? ""
-                                        : opt === "Nutty & Chocolatey"
-                                        ? ""
-                                        : opt === "Balanced & Smooth"
-                                        ? ""
-                                        : ""
-                                    }
                                   />
                                 ))}
                               </div>
@@ -633,54 +654,25 @@ export default function SubscriptionWizard({
                             >
                               <legend className="block text-enzi-db text-sm mb-2">Delivery frequency</legend>
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md">
-                                {SCHEDULE_OPTIONS.map((opt) => (
-                                  <RadioCard
-                                    key={opt}
-                                    name="schedule"
-                                    value={opt}
-                                    checked={data.schedule === opt}
-                                    onChange={setFieldAndAutoNext("schedule")}  
-                                    label={opt}
-                                  />
-                                ))}
-                              </div>
-                            </motion.fieldset>
-                          )}
-
-                          {subStep === "size" && (
-                            <motion.fieldset
-                              key="size"
-                              custom={dir}
-                              variants={variants}
-                              initial="enter"
-                              animate="center"
-                              exit="exit"
-                              transition={{ duration: 0.35, ease: "easeInOut" }}
-                            >
-                              <legend className="block text-enzi-db text-sm mb-2">Confirm bag size</legend>
-                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-xl">
-                                {SIZE_OPTIONS.map((opt) => (
-                                  <label
-                                    key={opt}
-                                    className={`${cardBase} cursor-pointer flex items-center gap-3`}
-                                  >
-                                    <input
-                                      type="radio"
-                                      name="size"
+                                {SCHEDULE_OPTIONS.map((opt) => {
+                                  const cupsPerDay = getCupsPerDay(data.cupsRange, data.customCups);
+                                  const recommendedSize = calculateRecommendedSize(cupsPerDay, opt);
+                                  const smartLabel = `${opt} (${recommendedSize})`;
+                                  const description = getSmartDescription(cupsPerDay);
+                                  
+                                  return (
+                                    <RadioCard
+                                      key={opt}
+                                      name="schedule"
                                       value={opt}
-                                      checked={data.size === opt}
-                                      onChange={(e) => setFieldAndAutoNext("size")(e.target.value)}  
-                                      className="h-5 w-5 accent-coffee-gold"
+                                      checked={data.schedule === opt}
+                                      onChange={setFieldAndAutoNext("schedule")}
+                                      label={smartLabel}
+                                      description={description}
                                     />
-                                    <span className="text-enzi-db font-medium">{opt}</span>
-                                  </label>
-                                ))}
+                                  );
+                                })}
                               </div>
-                              {suggestedSize && (
-                                <p className="mt-2 text-sm text-coffee-brown">
-                                  Recommended based on your cups/week: <strong>{suggestedSize}</strong>
-                                </p>
-                              )}
                             </motion.fieldset>
                           )}
 
@@ -774,12 +766,14 @@ export default function SubscriptionWizard({
                                 </div>
                               </div>
                               <ul className="text-sm text-enzi-db grid grid-cols-1 sm:grid-cols-2 gap-y-1">
-                                <li><strong>Cups/week:</strong> {data.cupsRange || "—"}</li>
+                                <li><strong>Cups/week:</strong> {data.cupsRange === "Others" ? `${data.customCups || 0} cups/day` : data.cupsRange || "—"}</li>
                                 <li><strong>Brew:</strong> {data.brewMethod || "—"}</li>
-                                <li><strong>Flavour:</strong> {data.flavorProfile || "—"}</li>
                                 <li><strong>Grind:</strong> {data.grindPref}{data.autoGrindNote ? ` — ${data.autoGrindNote}` : ""}</li>
-                                <li><strong>Bag size:</strong> {data.size || "—"}</li>
-                                <li><strong>Frequency:</strong> {data.schedule || "—"}</li>
+                                <li><strong>Frequency:</strong> {data.schedule ? (() => {
+                                  const cupsPerDay = getCupsPerDay(data.cupsRange, data.customCups);
+                                  const recommendedSize = calculateRecommendedSize(cupsPerDay, data.schedule as Schedule);
+                                  return `${data.schedule} (${recommendedSize})`;
+                                })() : "—"}</li>
                               </ul>
                             </motion.div>
                           )}
@@ -806,12 +800,12 @@ export default function SubscriptionWizard({
                     !isValid ||
                     (index === total - 1 &&
                       subStepsMap[step].indexOf(subStep) === subStepsMap[step].length - 1 &&
-                      submitting)
+                      mutation.isPending)
                   }
                   className="inline-flex items-center gap-2 rounded-xl px-5 py-3 sm:px-6 sm:py-3 font-semibold text-white bg-coffee-gold hover:bg-coffee-brown disabled:opacity-50 min-h-[48px]"
                 >
                   {index === total - 1 && subStepsMap[step].indexOf(subStep) === subStepsMap[step].length - 1
-                    ? (submitting ? "Submitting…" : "Subscribe Now")
+                    ? (mutation.isPending ? "Submitting…" : "Subscribe Now")
                     : "Next →"}
                 </button>
               </div>
