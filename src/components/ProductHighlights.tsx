@@ -1,8 +1,11 @@
 
 import React from "react";
-import type { ProductHighlightsProps } from "../types";
- 
-const ProductHighlights: React.FC<ProductHighlightsProps> = ({ products = [] }) => {
+import type { RoastedCoffeeBeanProduct } from "../types";
+
+const ProductHighlights: React.FC<{
+  products: RoastedCoffeeBeanProduct[];
+  onOrderClick?: (productId: string) => void;
+}> = ({ products = [], onOrderClick }) => {
   return (
     <section id="products" className="py-16 px-4 bg-white">
       <div className="max-w-7xl mx-auto">
@@ -49,13 +52,13 @@ const ProductHighlights: React.FC<ProductHighlightsProps> = ({ products = [] }) 
               {/* Footer */}
               <div className="mt-4 grid grid-cols-12 items-center gap-4">
                 <div className="col-span-6 md:col-span-4">
-                  <div className="text-[13px] text-enzi-db/70 font-['RoobertRegular']">Blend</div>
+                  <div className="text-[13px] text-enzi-db/70 font-['RoobertRegular']">Size</div>
                   <div className="text-enzi-db font-['RoobertRegular']">
-                    {(product as any).blend ?? "Harakati"}
+                    {(product as any).weight ?? "250g"}
                   </div>
                 </div>
                 <div className="col-span-6 md:col-span-4 text-center">
-                  <div className="text-[13px] text-enzi-db/70 font-['RoobertRegular']">Price</div>
+                  <div className="text-[13px] text-enzi-db/70 font-['RoobertRegular']">Price(Tsh)</div>
                   <div className="text-enzi-db font-['RoobertRegular']">
                     {(product as any).price ?? "TZS 12,000"}
                   </div>
@@ -64,12 +67,17 @@ const ProductHighlights: React.FC<ProductHighlightsProps> = ({ products = [] }) 
                   <button
                     className="inline-flex items-center justify-center whitespace-nowrap border border-enzi-db/60 px-5 py-3 sm:px-4 sm:py-2 text-base sm:text-sm font-['RoobertRegular'] text-enzi-db hover:bg-white w-full md:w-auto min-h-[48px]"
                     onClick={() => {
-                      const el = document.getElementById("products");
-                      if (el) {
-                        const header = document.querySelector('header');
-                        const headerHeight = header ? header.offsetHeight : 0;
-                        const elementPosition = el.getBoundingClientRect().top + window.pageYOffset;
-                        window.scrollTo({ top: elementPosition - headerHeight, behavior: 'smooth' });
+                      if (onOrderClick) {
+                        onOrderClick((product as any).id);
+                      } else {
+                        // Fallback to scroll behavior
+                        const el = document.getElementById("products");
+                        if (el) {
+                          const header = document.querySelector('header');
+                          const headerHeight = header ? header.offsetHeight : 0;
+                          const elementPosition = el.getBoundingClientRect().top + window.pageYOffset;
+                          window.scrollTo({ top: elementPosition - headerHeight, behavior: 'smooth' });
+                        }
                       }
                     }}
                     aria-label={`Order ${(product as any).name}`}

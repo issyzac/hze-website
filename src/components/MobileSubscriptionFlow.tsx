@@ -1,29 +1,38 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion, type Transition } from "framer-motion";
 import { ChevronRight, ChevronLeft, X } from "lucide-react";
+import { useSubscriptionForm } from "../hooks/useSubscriptionForm";
+import { type CupsRange, type BrewMethod, type GrindPref, type Schedule } from "../data/contact";
 
 // ------------------------------------------------------
-// Types (aligned with your desktop wizard)
+// Types
 // ------------------------------------------------------
-export type CupsRange = "Up to 4" | "4–8" | "8–12";
-export type BrewMethod = "Espresso" | "Pour-Over" | "French Press" | "Cold Brew";
-export type FlavorProfile =
-  | "Bright & Fruity"
-  | "Nutty & Chocolatey"
-  | "Balanced & Smooth"
-  | "Surprise me!";
-export type GrindPref = "Whole Bean" | "Ground";
-export type Size = "250g" | "500g" | "1kg";
-export type Schedule = "Every 2 weeks" | "Every 4 weeks";
-
-export interface SubscriptionData {
+interface SubscriptionData {
   cupsRange: CupsRange | "";
+  customCups?: number;
   brewMethod: BrewMethod | "";
-  flavorProfile: FlavorProfile | "";
   grindPref: GrindPref | "";
-  autoGrindNote?: string; 
+  autoGrindNote?: string;
   schedule: Schedule | "";
-  size: Size | "";  
+  fullName: string;
+  email: string;
+  phone?: string;
+}
+
+// Brand colors (focus on LOOKS only)
+const PRIMARY = "#B47744";    
+const SECONDARY = "#EEEBE7"; 
+
+// ------------------------------------------------------
+// Types
+// ------------------------------------------------------
+interface SubscriptionData {
+  cupsRange: CupsRange | "";
+  customCups?: number;
+  brewMethod: BrewMethod | "";
+  grindPref: GrindPref | "";
+  autoGrindNote?: string;
+  schedule: Schedule | "";
   fullName: string;
   email: string;
   phone?: string;
@@ -32,11 +41,10 @@ export interface SubscriptionData {
 export interface SubscriptionWizardProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit?: (data: SubscriptionData) => Promise<void> | void;
 }
 
 // ------------------------------------------------------
-// Helpers (no regex literals to avoid escaping in canvas updates)
+// Helpers (unchanged logic)
 // ------------------------------------------------------
 function isValidEmail(s: string) {
   const at = s.indexOf("@");
@@ -48,20 +56,13 @@ function isValidPhone(s: string) {
   return digits.length >= 6 && digits.length <= 20;
 }
 
-const CUP_OPTIONS: CupsRange[] = ["Up to 4", "4–8", "8–12"];
+const CUP_OPTIONS: CupsRange[] = ["1 to 2", "2 to 4", "5 - 7", "Others"];
 const BREW_OPTIONS: BrewMethod[] = ["Espresso", "Pour-Over", "French Press", "Cold Brew"];
-const FLAVOR_OPTIONS: FlavorProfile[] = [
-  "Bright & Fruity",
-  "Nutty & Chocolatey",
-  "Balanced & Smooth",
-  "Surprise me!",
-];
 const GRIND_OPTIONS: GrindPref[] = ["Whole Bean", "Ground"];
-const SIZE_OPTIONS: Size[] = ["250g", "500g", "1kg"];
 const SCHEDULE_OPTIONS: Schedule[] = ["Every 2 weeks", "Every 4 weeks"];
 
-const cardBase =
-  "rounded-2xl border border-coffee-brown/15 bg-[#F7F3ED] px-4 py-3 transition focus-within:ring-2 focus-within:ring-coffee-gold/50";
+// Shared card base using SECONDARY with subtle border
+const cardBase = `rounded-2xl border px-4 py-3 transition focus-within:ring-2`;
 
 const brewToGrindMap: Record<BrewMethod, string> = {
   Espresso: "Fine grind for espresso",
@@ -70,16 +71,58 @@ const brewToGrindMap: Record<BrewMethod, string> = {
   "Cold Brew": "Extra-coarse grind for steeping",
 };
 
-function recommendSize(cupsRange: CupsRange | ""): Size | "" {
+function calculateRecommendedSize(cupsPerDay: number, frequency: Schedule): string {
+  const gramsPerCup = 20;
+  const daysInPeriod = frequency === "Every 2 weeks" ? 14 : 28;
+  
+  const totalGramsNeeded = cupsPerDay * gramsPerCup * daysInPeriod;
+  
+  const totalWithBuffer = Math.ceil(totalGramsNeeded * 1.15);
+  
+  const availableSizes = [250, 500, 1000, 2000, 3000, 5000, 10000, 15000, 20000, 25000];
+  
+  const recommendedSizeGrams = availableSizes.find(size => size >= totalWithBuffer) || 
+     Math.ceil(totalWithBuffer / 25000) * 25000;
+  
+   if (recommendedSizeGrams >= 1000) {
+    if (recommendedSizeGrams % 1000 === 0) {
+      return `${recommendedSizeGrams / 1000}kg`;
+    } else {
+      return `${(recommendedSizeGrams / 1000).toFixed(1)}kg`;
+    }
+  } else {
+    return `${recommendedSizeGrams}g`;
+  }
+}
+
+function getCupsPerDay(cupsRange: CupsRange | "", customCups?: number): number {
+  if (cupsRange === "Others" && customCups !== undefined && customCups > 0) {
+    return customCups;
+  }
+  
   switch (cupsRange) {
-    case "Up to 4":
-      return "250g";
-    case "4–8":
-      return "500g";
-    case "8–12":
-      return "1kg";
-    default:
-      return "";
+    case "1 to 2": return 1.5;   
+    case "2 to 4": return 3;     
+    case "5 - 7": return 6; 
+    default: return 2;           
+  }
+}
+
+function getSmartDescription(cupsPerDay: number): string {
+  if (cupsPerDay <= 2) {
+    return "Perfect for occasional coffee moments";
+  } else if (cupsPerDay <= 4) {
+    return "Ideal for daily coffee routine";
+  } else if (cupsPerDay <= 8) {
+    return "Great for coffee lovers & small teams";
+  } else if (cupsPerDay <= 15) {
+    return "Perfect for offices & heavy users";
+  } else if (cupsPerDay <= 30) {
+    return "Ideal for medium businesses & cafes";
+  } else if (cupsPerDay <= 60) {
+    return "Perfect for large offices & coffee shops";
+  } else {
+    return "Enterprise solution for high-volume needs";
   }
 }
 
@@ -91,7 +134,7 @@ function prefersReducedMotion() {
 }
 
 // ------------------------------------------------------
-// Radio line item used throughout
+// Radio line item — recolored to brand palette
 // ------------------------------------------------------
 function RadioLine({
   name,
@@ -109,11 +152,19 @@ function RadioLine({
   description?: string;
 }) {
   return (
-    <label className="flex items-center justify-between w-full bg-white border border-coffee-brown/15 rounded-2xl px-4 py-4">
-      <span className="text-enzi-db">
+    <label
+      className="flex items-center justify-between w-full rounded-2xl px-4 py-4"
+      style={{
+        backgroundColor: "#FFFFFF",
+        border: `1px solid ${PRIMARY}20`, 
+      }}
+    >
+      <span style={{ color: "#3B2A1F" }}>
         <span className="block font-medium">{label}</span>
         {description ? (
-          <span className="block text-sm text-enzi-db/70">{description}</span>
+          <span className="block text-sm" style={{ color: "#3B2A1F80" }}>
+            {description}
+          </span>
         ) : null}
       </span>
       <input
@@ -122,33 +173,31 @@ function RadioLine({
         value={value}
         checked={checked}
         onChange={(e) => onChange(e.target.value)}
-        className="h-5 w-5 accent-coffee-gold"
+        className="h-5 w-5"
+        style={{ accentColor: PRIMARY }}
       />
     </label>
   );
 }
 
 // ------------------------------------------------------
-// Mobile-first full-screen experience (light theme, your palette)
+// Mobile-first full-screen experience (color refresh only)
 // ------------------------------------------------------
-export default function MobileSubscriptionFlow({ isOpen, onClose, onSubmit }: SubscriptionWizardProps) {
+export default function MobileSubscriptionFlow({ isOpen, onClose }: SubscriptionWizardProps) {
+  const { mutation } = useSubscriptionForm();
   type Screen =
     | "cups"
     | "brewMethod"
-    | "flavor"
     | "grind"
     | "frequency"
-    | "size"
     | "contact"
     | "summary";
 
   const order: Screen[] = [
     "cups",
     "brewMethod",
-    "flavor",
     "grind",
     "frequency",
-    "size",
     "contact",
     "summary",
   ];
@@ -158,30 +207,27 @@ export default function MobileSubscriptionFlow({ isOpen, onClose, onSubmit }: Su
 
   const [data, setData] = useState<SubscriptionData>({
     cupsRange: "",
+    customCups: undefined,
     brewMethod: "",
-    flavorProfile: "",
     grindPref: "",
     autoGrindNote: "",
     schedule: "",
-    size: "",
     fullName: "",
     email: "",
     phone: "",
   });
 
-  // Reset when closed
   useEffect(() => {
     if (!isOpen) {
       setScreen("cups");
       setDir(1);
       setData({
         cupsRange: "",
+        customCups: undefined,
         brewMethod: "",
-        flavorProfile: "",
         grindPref: "",
         autoGrindNote: "",
         schedule: "",
-        size: "",
         fullName: "",
         email: "",
         phone: "",
@@ -189,24 +235,12 @@ export default function MobileSubscriptionFlow({ isOpen, onClose, onSubmit }: Su
     }
   }, [isOpen]);
 
-  // Derived
-  const suggestedSize = useMemo(() => recommendSize(data.cupsRange), [data.cupsRange]);
-
-  // Auto-set grind note
+  // Handle successful submission
   useEffect(() => {
-    if (data.grindPref === "Ground" && data.brewMethod) {
-      setData((d) => ({ ...d, autoGrindNote: brewToGrindMap[d.brewMethod as BrewMethod] }));
-    } else if (data.grindPref !== "Ground") {
-      setData((d) => ({ ...d, autoGrindNote: "" }));
+    if (mutation.isSuccess) {
+      onClose();
     }
-  }, [data.grindPref, data.brewMethod]);
-
-  // Seed size the moment cups are chosen (ensures Size screen shows something)
-  useEffect(() => {
-    if (data.cupsRange) {
-      setData((d) => ({ ...d, size: d.size || (suggestedSize as Size) }));
-    }
-  }, [data.cupsRange, suggestedSize]);
+  }, [mutation.isSuccess, onClose]);
 
   const go = (next: Screen) => {
     const a = order.indexOf(screen);
@@ -221,21 +255,19 @@ export default function MobileSubscriptionFlow({ isOpen, onClose, onSubmit }: Su
     []
   );
 
-  // Validation per screen
   const isValid = useMemo(() => {
     switch (screen) {
       case "cups":
+        if (data.cupsRange === "Others") {
+          return data.customCups !== undefined && data.customCups > 0;
+        }
         return !!data.cupsRange;
       case "brewMethod":
         return !!data.brewMethod;
-      case "flavor":
-        return !!data.flavorProfile;
       case "grind":
         return !!data.grindPref;
       case "frequency":
         return !!data.schedule;
-      case "size":
-        return !!data.size;
       case "contact":
         return (
           data.fullName.trim().length > 0 &&
@@ -247,8 +279,8 @@ export default function MobileSubscriptionFlow({ isOpen, onClose, onSubmit }: Su
     }
   }, [screen, data]);
 
-  // Optional: auto-advance when selecting radios on choice screens
-  const autoNextOnChoice = (s: Screen) => ["cups", "brewMethod", "flavor", "grind", "frequency", "size"].includes(s);
+  const autoNextOnChoice = (s: Screen) =>
+    ["cups", "brewMethod", "grind", "frequency"].includes(s);
 
   const next = () => {
     const i = order.indexOf(screen);
@@ -260,16 +292,23 @@ export default function MobileSubscriptionFlow({ isOpen, onClose, onSubmit }: Su
     if (i > 0) go(order[i - 1]);
   };
 
-  const [submitting, setSubmitting] = useState(false);
   const submit = async () => {
     if (!isValid || screen !== "summary") return;
-    try {
-      setSubmitting(true);
-      await onSubmit?.(data);
-      onClose();
-    } finally {
-      setSubmitting(false);
-    }
+
+    // Convert component data to hook format
+    const formData = {
+      cupsRange: data.cupsRange as CupsRange,
+      customCups: data.customCups,
+      brewMethod: data.brewMethod as BrewMethod,
+      grindPref: data.grindPref as GrindPref,
+      schedule: data.schedule as Schedule,
+      fullName: data.fullName,
+      email: data.email,
+      phone: data.phone,
+    };
+
+    // Use mutation directly to submit the data
+    mutation.mutate(formData);
   };
 
   if (!isOpen) return null;
@@ -282,21 +321,31 @@ export default function MobileSubscriptionFlow({ isOpen, onClose, onSubmit }: Su
   } as const;
 
   return (
-    <div className="fixed inset-0 z-50 bg-white">
+    <div className="fixed inset-0 z-50" style={{ backgroundColor: SECONDARY }}>
       {/* Top bar */}
-      <header className="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-coffee-brown/10">
+      <header
+        className="sticky top-0 z-10 backdrop-blur"
+        style={{ backgroundColor: "rgba(238,235,231,0.9)", borderBottom: `1px solid ${PRIMARY}1A` }}
+      >
         <div className="px-4 py-3 flex items-center justify-between">
           <button
             onClick={back}
             disabled={order.indexOf(screen) === 0}
-            className="inline-flex items-center gap-2 text-sm px-3 py-2 rounded-xl border border-enzi-db/20 text-enzi-db disabled:opacity-40 bg-white"
+            className="inline-flex items-center gap-2 text-sm px-3 py-2 rounded-xl"
+            style={{
+              border: `1px solid ${PRIMARY}33`,
+              color: PRIMARY,
+              backgroundColor: "#FFFFFF",
+              opacity: order.indexOf(screen) === 0 ? 0.5 : 1,
+            }}
           >
             <ChevronLeft className="h-4 w-4" /> Back
           </button>
           <button
             onClick={onClose}
-            className="inline-flex items-center justify-center h-9 w-9 rounded-xl bg-coffee-cream/80 hover:bg-coffee-cream text-coffee-brown"
+            className="inline-flex items-center justify-center h-9 w-9 rounded-xl"
             aria-label="Close"
+            style={{ backgroundColor: `${SECONDARY}`, color: PRIMARY, border: `1px solid ${PRIMARY}33` }}
           >
             <X className="h-5 w-5" />
           </button>
@@ -304,15 +353,14 @@ export default function MobileSubscriptionFlow({ isOpen, onClose, onSubmit }: Su
       </header>
 
       {/* Content */}
-      <main className="px-4 py-4 pb-28">
+      <main className="px-4 py-4 pb-40">
         <AnimatePresence mode="wait" custom={dir}>
-          {/* Screen: cups */}
           {screen === "cups" && (
             <motion.section key="cups" custom={dir} variants={variants} initial="enter" animate="center" exit="exit" transition={t}>
-              <h1 className="text-2xl font-bold text-coffee-brown">Your partner in building a thriving coffee ritual</h1>
-              <p className="mt-2 text-enzi-db/80 text-sm">Pick what best describes your weekly coffee habits to get a tailored plan.</p>
+              <h1 className="text-2xl font-bold" style={{ color: "#3B2A1F" }}>Your partner in building a thriving coffee ritual</h1>
+              <p className="mt-2 text-sm" style={{ color: "#3B2A1FCC" }}>Pick what best describes your weekly coffee habits to get a tailored plan.</p>
 
-              <h2 className="mt-6 mb-2 text-enzi-db/80 text-sm font-semibold">I DRINK</h2>
+              <h2 className="mt-6 mb-2 text-sm font-semibold" style={{ color: "#3B2A1F99" }}>I DRINK</h2>
               <div className="grid gap-3">
                 {CUP_OPTIONS.map((opt) => (
                   <RadioLine
@@ -322,26 +370,46 @@ export default function MobileSubscriptionFlow({ isOpen, onClose, onSubmit }: Su
                     checked={data.cupsRange === opt}
                     onChange={(v) => {
                       setField("cupsRange")(v);
-                      if (autoNextOnChoice("cups")) setTimeout(next, 0);
+                      // Don't auto-advance for "Others" - user needs to enter custom number first
+                      if (autoNextOnChoice("cups") && v !== "Others") setTimeout(next, 0);
                     }}
                     label={opt}
                   />
                 ))}
               </div>
 
-              {data.cupsRange && (
-                <div className="mt-4 text-sm text-coffee-brown/90 bg-[#F7F3ED] border border-coffee-brown/20 rounded-xl p-3">
-                  Suggested size: <strong className="font-['RoobertBold']">{suggestedSize} per month</strong> based on your pace. You can adjust later.
-                </div>
+              {data.cupsRange === "Others" && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="mt-4"
+                >
+                  <div className="flex items-center gap-3">
+                    <label className="text-sm whitespace-nowrap" style={{ color: "#3B2A1F" }}>How many cups per day?</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={data.customCups || ""}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value, 10);
+                        setData((d) => ({ ...d, customCups: isNaN(value) ? undefined : value }));
+                      }}
+                      className="w-20 px-2 py-1 border rounded-md bg-white text-sm outline-none focus:ring-2"
+                      style={{ borderColor: `${PRIMARY}20`, color: "#3B2A1F" }}
+                      placeholder="6"
+                    />
+                  </div>
+                </motion.div>
               )}
             </motion.section>
           )}
 
-          {/* Screen: brewMethod */}
           {screen === "brewMethod" && (
             <motion.section key="brew" custom={dir} variants={variants} initial="enter" animate="center" exit="exit" transition={t}>
-              <h2 className="text-xl font-bold text-coffee-brown">How do you brew?</h2>
-              <p className="mt-2 text-enzi-db/80 text-sm">We’ll match grind to your method if you choose ground.</p>
+              <h2 className="text-xl font-bold" style={{ color: "#3B2A1F" }}>How do you brew?</h2>
+              <p className="mt-2 text-sm" style={{ color: "#3B2A1FCC" }}>We’ll match grind to your method if you choose ground.</p>
               <div className="mt-4 grid gap-3">
                 {BREW_OPTIONS.map((opt) => (
                   <RadioLine
@@ -357,29 +425,9 @@ export default function MobileSubscriptionFlow({ isOpen, onClose, onSubmit }: Su
             </motion.section>
           )}
 
-          {/* Screen: flavor */}
-          {screen === "flavor" && (
-            <motion.section key="flavor" custom={dir} variants={variants} initial="enter" animate="center" exit="exit" transition={t}>
-              <h2 className="text-xl font-bold text-coffee-brown">Flavour profile</h2>
-              <div className="mt-4 grid gap-3">
-                {FLAVOR_OPTIONS.map((opt) => (
-                  <RadioLine
-                    key={opt}
-                    name="flavorProfile"
-                    value={opt}
-                    checked={data.flavorProfile === opt}
-                    onChange={(v) => { setField("flavorProfile")(v); if (autoNextOnChoice("flavor")) setTimeout(next, 0); }}
-                    label={opt}
-                  />
-                ))}
-              </div>
-            </motion.section>
-          )}
-
-          {/* Screen: grind */}
           {screen === "grind" && (
             <motion.section key="grind" custom={dir} variants={variants} initial="enter" animate="center" exit="exit" transition={t}>
-              <h2 className="text-xl font-bold text-coffee-brown">Grind preference</h2>
+              <h2 className="text-xl font-bold" style={{ color: "#3B2A1F" }}>Grind preference</h2>
               <div className="mt-4 grid gap-3 max-w-lg">
                 {GRIND_OPTIONS.map((opt) => (
                   <RadioLine
@@ -402,67 +450,52 @@ export default function MobileSubscriptionFlow({ isOpen, onClose, onSubmit }: Su
             </motion.section>
           )}
 
-          {/* Screen: frequency */}
           {screen === "frequency" && (
             <motion.section key="freq" custom={dir} variants={variants} initial="enter" animate="center" exit="exit" transition={t}>
-              <h2 className="text-xl font-bold text-coffee-brown">Delivery frequency</h2>
+              <h2 className="text-xl font-bold" style={{ color: "#3B2A1F" }}>Delivery frequency</h2>
               <div className="mt-4 grid gap-3 max-w-lg">
-                {SCHEDULE_OPTIONS.map((opt) => (
-                  <RadioLine
-                    key={opt}
-                    name="schedule"
-                    value={opt}
-                    checked={data.schedule === opt}
-                    onChange={(v) => { setField("schedule")(v); if (autoNextOnChoice("frequency")) setTimeout(next, 0); }}
-                    label={opt}
-                  />
-                ))}
-              </div>
-            </motion.section>
-          )}
-
-          {/* Screen: size */}
-          {screen === "size" && (
-            <motion.section key="size" custom={dir} variants={variants} initial="enter" animate="center" exit="exit" transition={t}>
-              <h2 className="text-xl font-bold text-coffee-brown">Confirm bag size</h2>
-              <p className="mt-2 text-enzi-db/80 text-sm">We recommend <span className="text-coffee-brown font-semibold">{suggestedSize || "—"}</span> based on your cups/week.</p>
-              <div className="mt-4 grid gap-3 grid-cols-1 sm:grid-cols-3 max-w-xl">
-                {SIZE_OPTIONS.map((opt) => (
-                  <label key={opt} className={`${cardBase} flex items-center justify-between`}>
-                    <span className="text-enzi-db font-medium">{opt}</span>
-                    <input
-                      type="radio"
-                      name="size"
+                {SCHEDULE_OPTIONS.map((opt) => {
+                  const cupsPerDay = getCupsPerDay(data.cupsRange, data.customCups);
+                  const recommendedSize = calculateRecommendedSize(cupsPerDay, opt);
+                  const smartLabel = `${opt} (${recommendedSize})`;
+                  const description = getSmartDescription(cupsPerDay);
+                  
+                  return (
+                    <RadioLine
+                      key={opt}
+                      name="schedule"
                       value={opt}
-                      checked={data.size === opt}
-                      onChange={(e) => { setField("size")(e.target.value); if (autoNextOnChoice("size")) setTimeout(next, 0); }}
-                      className="h-5 w-5 accent-coffee-gold"
+                      checked={data.schedule === opt}
+                      onChange={(v) => { setField("schedule")(v); if (autoNextOnChoice("frequency")) setTimeout(next, 0); }}
+                      label={smartLabel}
+                      description={description}
                     />
-                  </label>
-                ))}
+                  );
+                })}
               </div>
             </motion.section>
           )}
 
-          {/* Screen: contact */}
           {screen === "contact" && (
             <motion.section key="contact" custom={dir} variants={variants} initial="enter" animate="center" exit="exit" transition={t}>
-              <h2 className="text-xl font-bold text-coffee-brown">Where can we reach you?</h2>
-              <p className="mt-2 text-enzi-db/80 text-sm">We’ll send order updates and tips to get the best out of your beans.</p>
+              <h2 className="text-xl font-bold" style={{ color: "#3B2A1F" }}>Where can we reach you?</h2>
+              <p className="mt-2 text-sm" style={{ color: "#3B2A1FCC" }}>We’ll send order updates and tips to get the best out of your beans.</p>
               <form className="mt-4 grid gap-3" onSubmit={(e) => e.preventDefault()}>
-                <div className={`${cardBase} bg-white`}>
-                  <label className="block text-enzi-db/70 text-sm mb-1">Full name *</label>
+                <div className={`${cardBase} rounded-2xl`} style={{ backgroundColor: "#FFFFFF", borderColor: `${PRIMARY}26`, boxShadow: `0 1px 0 ${PRIMARY}14 inset` }}>
+                  <label className="block text-sm mb-1" style={{ color: "#3B2A1F99" }}>Full name *</label>
                   <input
-                    className="w-full bg-transparent outline-none text-enzi-db"
+                    className="w-full bg-transparent outline-none"
+                    style={{ color: "#3B2A1F" }}
                     placeholder="e.g., Asha N."
                     value={data.fullName}
                     onChange={(e) => setField("fullName")(e.target.value)}
                   />
                 </div>
-                <div className={`${cardBase} bg-white`}>
-                  <label className="block text-enzi-db/70 text-sm mb-1">Email *</label>
+                <div className={`${cardBase} rounded-2xl`} style={{ backgroundColor: "#FFFFFF", borderColor: `${PRIMARY}26`, boxShadow: `0 1px 0 ${PRIMARY}14 inset` }}>
+                  <label className="block text-sm mb-1" style={{ color: "#3B2A1F99" }}>Email *</label>
                   <input
-                    className="w-full bg-transparent outline-none text-enzi-db"
+                    className="w-full bg-transparent outline-none"
+                    style={{ color: "#3B2A1F" }}
                     placeholder="you@example.com"
                     inputMode="email"
                     autoComplete="email"
@@ -470,13 +503,14 @@ export default function MobileSubscriptionFlow({ isOpen, onClose, onSubmit }: Su
                     onChange={(e) => setField("email")(e.target.value)}
                   />
                   {!!data.email && !isValidEmail(data.email) && (
-                    <p className="mt-1 text-xs text-red-600">Please enter a valid email.</p>
+                    <p className="mt-1 text-xs" style={{ color: "#B00020" }}>Please enter a valid email.</p>
                   )}
                 </div>
-                <div className={`${cardBase} bg-white`}>
-                  <label className="block text-enzi-db/70 text-sm mb-1">Phone (optional)</label>
+                <div className={`${cardBase} rounded-2xl`} style={{ backgroundColor: "#FFFFFF", borderColor: `${PRIMARY}26`, boxShadow: `0 1px 0 ${PRIMARY}14 inset` }}>
+                  <label className="block text-sm mb-1" style={{ color: "#3B2A1F99" }}>Phone (optional)</label>
                   <input
-                    className="w-full bg-transparent outline-none text-enzi-db"
+                    className="w-full bg-transparent outline-none"
+                    style={{ color: "#3B2A1F" }}
                     placeholder="+255 712 345 678"
                     inputMode="tel"
                     autoComplete="tel"
@@ -484,40 +518,58 @@ export default function MobileSubscriptionFlow({ isOpen, onClose, onSubmit }: Su
                     onChange={(e) => setField("phone")(e.target.value)}
                   />
                   {!!data.phone && !isValidPhone(data.phone || "") && (
-                    <p className="mt-1 text-xs text-red-600">Please enter a valid phone.</p>
+                    <p className="mt-1 text-xs" style={{ color: "#B00020" }}>Please enter a valid phone.</p>
                   )}
                 </div>
               </form>
             </motion.section>
           )}
 
-          {/* Screen: summary */}
           {screen === "summary" && (
             <motion.section key="summary" custom={dir} variants={variants} initial="enter" animate="center" exit="exit" transition={t}>
-              <h2 className="text-xl font-bold text-coffee-brown">Review & confirm</h2>
-              <div className="mt-4 bg-white border border-coffee-brown/20 rounded-2xl divide-y divide-coffee-brown/10">
-                <SummaryRow label="Cups / week" value={data.cupsRange || "—"} onEdit={() => go("cups")} />
+              <h2 className="text-xl font-bold" style={{ color: "#3B2A1F" }}>Review & confirm</h2>
+              <div className="mt-4 rounded-2xl divide-y" style={{ backgroundColor: "#FFFFFF", border: `1px solid ${PRIMARY}26`, color: "#3B2A1F", borderColor: `${PRIMARY}26` }}>
+                <SummaryRow label="Cups / day" value={data.cupsRange === "Others" ? `${data.customCups || 0} cups/day` : data.cupsRange || "—"} onEdit={() => go("cups")} />
                 <SummaryRow label="Brew" value={data.brewMethod || "—"} onEdit={() => go("brewMethod")} />
-                <SummaryRow label="Flavour" value={data.flavorProfile || "—"} onEdit={() => go("flavor")} />
                 <SummaryRow label="Grind" value={`${data.grindPref || "—"}${data.autoGrindNote ? ` — ${data.autoGrindNote}` : ""}`} onEdit={() => go("grind")} />
-                <SummaryRow label="Bag size" value={data.size || "—"} onEdit={() => go("size")} />
-                <SummaryRow label="Frequency" value={data.schedule || "—"} onEdit={() => go("frequency")} />
+                <SummaryRow label="Frequency" value={data.schedule ? (() => {
+                  const cupsPerDay = getCupsPerDay(data.cupsRange, data.customCups);
+                  const recommendedSize = calculateRecommendedSize(cupsPerDay, data.schedule as Schedule);
+                  return `${data.schedule} (${recommendedSize})`;
+                })() : "—"} onEdit={() => go("frequency")} />
                 <SummaryRow label="Name" value={data.fullName || "—"} onEdit={() => go("contact")} />
                 <SummaryRow label="Email" value={data.email || "—"} onEdit={() => go("contact")} />
               </div>
-              <p className="mt-3 text-xs text-enzi-db/80">By subscribing you agree to receive transactional emails. You can pause or adjust any time.</p>
+              <p className="mt-3 text-xs" style={{ color: "#3B2A1FCC" }}>
+                By subscribing you agree to receive transactional emails. You can pause or adjust any time.
+              </p>
             </motion.section>
           )}
         </AnimatePresence>
       </main>
 
-      {/* Sticky bottom nav like your desktop design */}
-      <footer className="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur border-t border-coffee-brown/10 p-4">
-        <div className="flex items-center justify-between gap-3">
+      {/* Sticky bottom nav — improved contrast & touch targets */}
+      <footer
+        className="fixed bottom-0 inset-x-0 p-4"
+        style={{
+          background: `linear-gradient(180deg, rgba(238,235,231,0.85) 0%, rgba(238,235,231,0.95) 40%, ${SECONDARY} 100%)`,
+          borderTop: `1px solid ${PRIMARY}1A`,
+          paddingBottom: "max(1rem, env(safe-area-inset-bottom))",
+          backdropFilter: "saturate(1.1) blur(8px)",
+        }}
+      >
+        <div className="flex items-center gap-3">
           <button
             onClick={back}
             disabled={order.indexOf(screen) === 0}
-            className="inline-flex items-center gap-2 rounded-xl border border-enzi-db/30 px-5 py-3 text-enzi-db disabled:opacity-40 bg-white"
+            className="inline-flex items-center justify-center rounded-xl px-5 py-3 text-sm font-medium w-1/3"
+            style={{
+              border: `1px solid ${PRIMARY}66`,
+              color: PRIMARY,
+              backgroundColor: "#FFFFFF",
+              opacity: order.indexOf(screen) === 0 ? 0.6 : 1,
+              boxShadow: `0 1px 0 ${PRIMARY}1A inset` ,
+            }}
           >
             ← Back
           </button>
@@ -525,16 +577,28 @@ export default function MobileSubscriptionFlow({ isOpen, onClose, onSubmit }: Su
           {screen === "summary" ? (
             <button
               onClick={submit}
-              disabled={submitting}
-              className="inline-flex items-center gap-2 rounded-xl px-6 py-3 font-semibold text-white bg-coffee-gold hover:bg-coffee-brown disabled:opacity-50"
+              disabled={mutation.isPending}
+              className="inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold flex-1"
+              style={{
+                backgroundColor: PRIMARY,
+                color: "#FFFFFF",
+                boxShadow: `0 6px 18px ${PRIMARY}33`,
+                opacity: mutation.isPending ? 0.7 : 1,
+              }}
             >
-              {submitting ? "Submitting…" : "Confirm & Subscribe"}
+              {mutation.isPending ? "Submitting…" : "Confirm & Subscribe"}
             </button>
           ) : (
             <button
               onClick={next}
               disabled={!isValid}
-              className="inline-flex items-center gap-2 rounded-xl px-6 py-3 font-semibold text-white bg-coffee-gold hover:bg-coffee-brown disabled:opacity-50"
+              className="inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold flex-1"
+              style={{
+                backgroundColor: PRIMARY,
+                color: "#FFFFFF",
+                boxShadow: `0 6px 18px ${PRIMARY}33`,
+                opacity: !isValid ? 0.6 : 1,
+              }}
             >
               Next →
             </button>
@@ -547,12 +611,12 @@ export default function MobileSubscriptionFlow({ isOpen, onClose, onSubmit }: Su
 
 function SummaryRow({ label, value, onEdit }: { label: string; value: string; onEdit: () => void }) {
   return (
-    <button onClick={onEdit} className="w-full px-4 py-3 flex items-center justify-between text-enzi-db">
+    <button onClick={onEdit} className="w-full px-4 py-3 flex items-center justify-between" style={{ color: "#3B2A1F" }}>
       <div>
-        <div className="text-xs text-enzi-db/70">{label}</div>
+        <div className="text-xs" style={{ color: "#3B2A1F99" }}>{label}</div>
         <div className="text-sm mt-0.5">{value}</div>
       </div>
-      <ChevronRight className="h-4 w-4 text-enzi-db/60" />
+      <ChevronRight className="h-4 w-4" style={{ color: "#3B2A1F80" }} />
     </button>
   );
 }

@@ -4,8 +4,8 @@ export interface RoastedCoffeeBeanProduct {
   name: string;
   description: string;
   image: string;
-  price: number;
-  category: 'original' | 'hazelnut' | 'vanilla' | 'decaf';
+  price: string;
+  category: 'Nguvu' | 'Tunu' | 'Amka';
   roastLevel: 'light' | 'medium' | 'dark';
   origin: string;
   flavorNotes: string[];
@@ -15,6 +15,7 @@ export interface RoastedCoffeeBeanProduct {
   processingMethod: string; // e.g., "washed", "natural", "honey"
   roastDate?: string;
   certifications?: string[]; // e.g., ["organic", "fair-trade"]
+  backgroundColor: string;
 }
 
 // Bundle item interface
