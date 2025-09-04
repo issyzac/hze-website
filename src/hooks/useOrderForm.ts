@@ -29,7 +29,7 @@ export const useOrderForm = () => {
                 note: data.note || '',
                 timestamp: new Date().toISOString(),
             };
-            const response = await axios.post('http://127.0.0.1:5001/api/orders/', orderData, {
+            const response = await axios.post('https://loyaserver.enzi.coffee/api/orders/', orderData, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
