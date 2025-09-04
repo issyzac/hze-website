@@ -353,22 +353,6 @@ export default function MobileOrderFlow({ isOpen, onClose, initialProductId }: O
                     <p className="mt-2 text-xs" style={{ color: "#B00020" }}>Please enter a valid phone.</p>
                   )}
                 </div>
-
-                <div className="rounded-2xl px-4 py-4" style={{ backgroundColor: "#FFFFFF", border: `1px solid ${PRIMARY}26` }}>
-                  <label className="block text-sm mb-2 font-medium" style={{ color: "#3B2A1F99" }}>Phone (optional)</label>
-                  <input
-                    className="w-full bg-transparent outline-none"
-                    style={{ color: "#3B2A1F" }}
-                    placeholder="+255 712 345 678"
-                    inputMode="tel"
-                    autoComplete="tel"
-                    value={data.phone || ""}
-                    onChange={(e) => setField("phone")(e.target.value)}
-                  />
-                  {!!data.phone && !isValidPhone(data.phone) && (
-                    <p className="mt-2 text-xs" style={{ color: "#B00020" }}>Please enter a valid phone.</p>
-                  )}
-                </div>
               </form>
 
               {selectedProduct && (
