@@ -6,12 +6,7 @@ interface OurStoryProps {
   heading?: string;
   description?: string | string[];
 } 
-const CoffeeDivider = ({ className }: { className?: string }) => (
-  <div className={`flex items-center justify-center gap-2 ${className}`}>
-    <div className="w-8 h-px bg-gradient-to-r from-transparent via-coffee-brown/30 to-transparent"></div>
-     <div className="w-8 h-px bg-gradient-to-r from-transparent via-coffee-brown/30 to-transparent"></div>
-  </div>
-);
+ 
 export default function OurStory({
   imageSrc = "/assets/images/our_story_bg.png",
   imageAlt = "Coffee cups and latte art",
