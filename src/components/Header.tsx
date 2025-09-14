@@ -8,8 +8,8 @@ interface HeaderProps {
 
 
 export default function Header({
-  instagramUrl = "https://instagram.com/your-handle",
-  xUrl = "https://x.com/your-handle",
+  instagramUrl = "https://www.instagram.com/harakatizaenzi",
+  xUrl = "https://x.com/harakatizaenzi",
   logoSrc = "/assets/Hze-logo.png",
 }: HeaderProps) {
   const [isScrolled, setIsScrolled] = useState(false);
