@@ -70,6 +70,25 @@ function calculateRecommendedSize(cupsPerDay: number, frequency: Schedule): stri
   }
 }
 
+function calculatePrice(cupsPerDay: number, frequency: Schedule): string {
+  const gramsPerCup = 20;
+  const daysInPeriod = frequency === "Every 2 weeks" ? 14 : 28;
+  
+  const totalGramsNeeded = cupsPerDay * gramsPerCup * daysInPeriod;
+  const totalWithBuffer = Math.ceil(totalGramsNeeded * 1.15);
+  
+  const availableSizes = [250, 500, 1000, 2000, 3000, 5000, 10000, 15000, 20000, 25000];
+  const recommendedSizeGrams = availableSizes.find(size => size >= totalWithBuffer) || 
+     Math.ceil(totalWithBuffer / 25000) * 25000;
+  
+  
+  const pricePerGram = 22000 / 250;  
+  
+  const totalPrice = recommendedSizeGrams * pricePerGram;
+  
+  return `TSH ${totalPrice.toLocaleString()}`;
+}
+
 function getCupsPerDay(cupsRange: CupsRange | "", customCups?: number): number {
   if (cupsRange === "Others" && customCups !== undefined && customCups > 0) {
     return customCups;
@@ -652,13 +671,14 @@ export default function SubscriptionWizard({
                               exit="exit"
                               transition={{ duration: 0.35, ease: "easeInOut" }}
                             >
-                              <legend className="block text-enzi-db text-sm mb-2">Delivery frequency</legend>
+                              <legend className="block text-enzi-db text-sm mb-2">Step 3 of 3: When should your coffee arrive?</legend>
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md">
                                 {SCHEDULE_OPTIONS.map((opt) => {
                                   const cupsPerDay = getCupsPerDay(data.cupsRange, data.customCups);
                                   const recommendedSize = calculateRecommendedSize(cupsPerDay, opt);
+                                  const price = calculatePrice(cupsPerDay, opt);
                                   const smartLabel = `${opt} (${recommendedSize})`;
-                                  const description = getSmartDescription(cupsPerDay);
+                                  const description = `${getSmartDescription(cupsPerDay)} • ${price}`;
                                   
                                   return (
                                     <RadioCard
