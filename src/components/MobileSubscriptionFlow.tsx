@@ -95,6 +95,26 @@ function calculateRecommendedSize(cupsPerDay: number, frequency: Schedule): stri
   }
 }
 
+function calculatePrice(cupsPerDay: number, frequency: Schedule): string {
+  const gramsPerCup = 20;
+  const daysInPeriod = frequency === "Every 2 weeks" ? 14 : 28;
+  
+  const totalGramsNeeded = cupsPerDay * gramsPerCup * daysInPeriod;
+  const totalWithBuffer = Math.ceil(totalGramsNeeded * 1.15);
+  
+  const availableSizes = [250, 500, 1000, 2000, 3000, 5000, 10000, 15000, 20000, 25000];
+  const recommendedSizeGrams = availableSizes.find(size => size >= totalWithBuffer) || 
+     Math.ceil(totalWithBuffer / 25000) * 25000;
+  
+  // Price: TSH 22,000 per 250g
+  const pricePerGram = 22000 / 250; // TSH 88 per gram
+  
+  const totalPrice = recommendedSizeGrams * pricePerGram;
+  
+  // Format price with thousand separators
+  return `TSH ${totalPrice.toLocaleString()}`;
+}
+
 function getCupsPerDay(cupsRange: CupsRange | "", customCups?: number): number {
   if (cupsRange === "Others" && customCups !== undefined && customCups > 0) {
     return customCups;
@@ -452,13 +472,15 @@ export default function MobileSubscriptionFlow({ isOpen, onClose }: Subscription
 
           {screen === "frequency" && (
             <motion.section key="freq" custom={dir} variants={variants} initial="enter" animate="center" exit="exit" transition={t}>
-              <h2 className="text-xl font-bold" style={{ color: "#3B2A1F" }}>Delivery frequency</h2>
+              <h2 className="text-xl font-bold" style={{ color: "#3B2A1F" }}>Step 3 of 3: When should your coffee arrive?</h2>
+              <p className="mt-2 text-sm" style={{ color: "#3B2A1FCC" }}>Choose how often you'd like fresh coffee delivered to your door.</p>
               <div className="mt-4 grid gap-3 max-w-lg">
                 {SCHEDULE_OPTIONS.map((opt) => {
                   const cupsPerDay = getCupsPerDay(data.cupsRange, data.customCups);
                   const recommendedSize = calculateRecommendedSize(cupsPerDay, opt);
+                  const price = calculatePrice(cupsPerDay, opt);
                   const smartLabel = `${opt} (${recommendedSize})`;
-                  const description = getSmartDescription(cupsPerDay);
+                  const description = `${getSmartDescription(cupsPerDay)} • ${price}`;
                   
                   return (
                     <RadioLine
