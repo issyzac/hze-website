@@ -50,7 +50,9 @@ export default function Header({
       }`}
     >
       {/* Top bar: socials + mobile menu button */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 transition-all duration-300 ${
+        isScrolled ? "hidden md:hidden" : ""
+      }`}>
         <div className="flex items-center justify-between h-10">
           {/* Mobile menu button (left) */}
           <button
@@ -73,7 +75,11 @@ export default function Header({
           <div className="md:flex-1" />
 
           {/* Social icons (right) */}
-          <div className="flex items-center gap-4 sm:gap-5 mt-8">
+          <div
+            className={`flex items-center gap-4 sm:gap-5 mt-8 transition-all duration-300 ${
+              isScrolled ? "opacity-0 pointer-events-none" : "opacity-100"
+            }`}
+          >
             <a
               href={instagramUrl}
               target="_blank"
@@ -105,7 +111,7 @@ export default function Header({
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="py-4 md:py-6 mt-4 md:mt-0 flex justify-center">
+        <div className={`flex justify-center transition-all duration-300 ${isScrolled ? "py-4 md:py-4" : "py-4 md:py-6 mt-4 md:mt-0"}`}>
           <a href="#home" onClick={(e) => handleNav(e, "#home")} className="block">
             <img
               src={logoSrc}
@@ -117,7 +123,9 @@ export default function Header({
       </div>
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <nav className="hidden md:flex items-center justify-center gap-8 pb-4">
+        <nav className={`hidden md:flex items-center justify-center gap-8 transition-all duration-300 ${
+          isScrolled ? "pb-2" : "pb-4"
+        }`}>
           {nav.map((item) => (
             <a
               key={item.name}
