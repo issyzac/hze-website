@@ -30,9 +30,9 @@ export const useSubscriptionForm = () => {
                 phone: data.phone || '', 
                 calculatedCupsPerDay: data.cupsRange === "Others" && data.customCups
                     ? data.customCups
-                    : data.cupsRange === "1 to 2" ? 1.5
-                    : data.cupsRange === "2 to 4" ? 3
-                    : data.cupsRange === "5 - 7" ? 6
+                    : data.cupsRange === "Two or more cups a day" ? 3
+                    : data.cupsRange === "A cup every other day" ? 1.5
+                    : data.cupsRange === "1 cup a day" ? 1
                     : 2,
                 timestamp: new Date().toISOString(),
             };
