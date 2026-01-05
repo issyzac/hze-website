@@ -22,18 +22,16 @@ export const useSubscriptionForm = () => {
         mutationFn: async (data: SubscriptionType) => { 
             const subscriptionData = {
                 cupsRange: data.cupsRange,
+                customCups: data.customCups,
                 brewMethod: data.brewMethod,
                 grindPref: data.grindPref,
+                coffeeProduct: data.coffeeProduct,
                 schedule: data.schedule,
+                recommendedSize: data.recommendedSize,
+                calculatedPrice: data.calculatedPrice,
                 fullName: data.fullName,
                 email: data.email,
-                phone: data.phone || '', 
-                calculatedCupsPerDay: data.cupsRange === "Others" && data.customCups
-                    ? data.customCups
-                    : data.cupsRange === "Two or more cups a day" ? 3
-                    : data.cupsRange === "A cup every other day" ? 1.5
-                    : data.cupsRange === "1 cup a day" ? 1
-                    : 2,
+                phone: data.phone || '',
                 timestamp: new Date().toISOString(),
             };
 
