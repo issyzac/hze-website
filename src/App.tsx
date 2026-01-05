@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from './components/Header'
 import HeroSection from './components/HeroSection'
 import ProductHighlights from './components/ProductHighlights'
@@ -23,6 +22,14 @@ function App() {
   const [selectedProductId, setSelectedProductId] = useState<string>('');
   const isMobile = useIsMobile();
 
+  // Check URL params on mount to auto-open subscription dialog
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('subscribe') === 'true' || params.has('subscribe')) {
+      setIsSubscriptionModalOpen(true); 
+    }
+  }, []);
+
   const openSubscriptionModal = () => {
     setIsSubscriptionModalOpen(true);
   };
@@ -30,7 +37,9 @@ function App() {
   const openOrderModal = (productId: string) => {
     setSelectedProductId(productId);
     setIsOrderModalOpen(true);
-  };  return (
+  };
+
+  return (
     <div className="min-h-screen bg-coffee-cream">
       <Header />
 
