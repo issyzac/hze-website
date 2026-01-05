@@ -14,7 +14,10 @@ interface SubscriptionData {
   brewMethod: BrewMethod | "";
   grindPref: GrindPref | "";
   autoGrindNote?: string;
+  coffeeProduct: "Nguvu" | "Tunu" | "Amka" | "";
   schedule: Schedule | "";
+  recommendedSize?: string;
+  calculatedPrice?: string;
   fullName: string;
   email: string;
   phone?: string;
@@ -34,10 +37,15 @@ const phoneRegex = /^[+]?[\d ()-]{6,20}$/;
 const cardBase =
   "border border-coffee-brown/20 bg-[#F7F3ED] px-4 py-3 md:px-6 md:py-4 transition transform hover:scale-[1.02] focus-within:ring-2 focus-within:ring-coffee-gold/50";
 
-const CUP_OPTIONS: CupsRange[] = ["1 to 2", "2 to 4", "5 - 7", "Others"];
+const CUP_OPTIONS: CupsRange[] = ["1 cup a day", "A cup every other day", "Two or more cups a day", "Others"];
 const BREW_OPTIONS: BrewMethod[] = ["Espresso", "Pour-Over", "French Press", "Cold Brew"];
 const GRIND_OPTIONS: GrindPref[] = ["Whole Bean", "Ground"];
-const SCHEDULE_OPTIONS: Schedule[] = ["Every 2 weeks", "Every 4 weeks"];
+const COFFEE_OPTIONS = [
+  { name: "Nguvu", description: "Medium roast with hazelnut", price: "TSH 18,000" },
+  { name: "Tunu", description: "Dark roast with vanilla", price: "TSH 22,000" },
+  { name: "Amka", description: "Decaf blend", price: "TSH 15,000" }
+] as const;
+const SCHEDULE_OPTIONS: Schedule[] = ["Every 4 weeks"];
 
 const brewToGrindMap: Record<BrewMethod, string> = {
   Espresso: "Fine grind for espresso",
@@ -46,9 +54,18 @@ const brewToGrindMap: Record<BrewMethod, string> = {
   "Cold Brew": "Extra-coarse grind for steeping",
 };
 
+function getCoffeePrice(coffeeProduct: string): number {
+  switch (coffeeProduct) {
+    case "Nguvu": return 18000;
+    case "Tunu": return 22000;
+    case "Amka": return 15000;
+    default: return 22000;  
+  }
+}
+
 function calculateRecommendedSize(cupsPerDay: number, frequency: Schedule): string {
   const gramsPerCup = 20;
-  const daysInPeriod = frequency === "Every 2 weeks" ? 14 : 28;
+  const daysInPeriod = 28; // Every 4 weeks
   
   const totalGramsNeeded = cupsPerDay * gramsPerCup * daysInPeriod;
   
@@ -70,9 +87,9 @@ function calculateRecommendedSize(cupsPerDay: number, frequency: Schedule): stri
   }
 }
 
-function calculatePrice(cupsPerDay: number, frequency: Schedule): string {
+function calculatePrice(cupsPerDay: number, frequency: Schedule, coffeeProduct: string): string {
   const gramsPerCup = 20;
-  const daysInPeriod = frequency === "Every 2 weeks" ? 14 : 28;
+  const daysInPeriod = 28; // Every 4 weeks
   
   const totalGramsNeeded = cupsPerDay * gramsPerCup * daysInPeriod;
   const totalWithBuffer = Math.ceil(totalGramsNeeded * 1.15);
@@ -81,8 +98,8 @@ function calculatePrice(cupsPerDay: number, frequency: Schedule): string {
   const recommendedSizeGrams = availableSizes.find(size => size >= totalWithBuffer) || 
      Math.ceil(totalWithBuffer / 25000) * 25000;
   
-  
-  const pricePerGram = 22000 / 250;  
+  const basePrice = getCoffeePrice(coffeeProduct);
+  const pricePerGram = basePrice / 250;
   
   const totalPrice = recommendedSizeGrams * pricePerGram;
   
@@ -95,10 +112,11 @@ function getCupsPerDay(cupsRange: CupsRange | "", customCups?: number): number {
   }
   
   switch (cupsRange) {
-    case "1 to 2": return 1.5;   
-    case "2 to 4": return 3;     
-    case "5 - 7": return 6; 
-    default: return 2;           
+    case "1 cup a day": return 1;
+    case "A cup every other day": return 0.5;
+    case "Two or more cups a day": return 2;
+    case "Others": return 2; // default if no custom value
+    default: return 1; // fallback
   }
 }
 
@@ -210,7 +228,7 @@ export default function SubscriptionWizard({
   const subStepsMap: Record<StepKey, string[]> = {
     cups: ["cups"],
     brew: ["brewMethod", "grind"],
-    schedule: ["frequency", "contact", "summary"],
+    schedule: ["coffeeProduct", "frequency", "contact", "summary"],
   };
 
   const [step, setStep] = useState<StepKey>("cups");
@@ -225,7 +243,10 @@ export default function SubscriptionWizard({
     brewMethod: "",
     grindPref: "",
     autoGrindNote: "",
+    coffeeProduct: "",
     schedule: "",
+    recommendedSize: undefined,
+    calculatedPrice: undefined,
     fullName: "",
     email: "",
     phone: "",
@@ -250,7 +271,10 @@ export default function SubscriptionWizard({
         brewMethod: "",
         grindPref: "",
         autoGrindNote: "",
+        coffeeProduct: "",
         schedule: "",
+        recommendedSize: undefined,
+        calculatedPrice: undefined,
         fullName: "",
         email: "",
         phone: "",
@@ -300,6 +324,16 @@ export default function SubscriptionWizard({
     }
   }, [data.grindPref, data.brewMethod]);
 
+  // Calculate price and recommended size when relevant data changes
+  useEffect(() => {
+    if (data.cupsRange && data.coffeeProduct && data.schedule) {
+      const cupsPerDay = getCupsPerDay(data.cupsRange, data.customCups);
+      const recommendedSize = calculateRecommendedSize(cupsPerDay, data.schedule as Schedule);
+      const calculatedPrice = calculatePrice(cupsPerDay, data.schedule as Schedule, data.coffeeProduct);
+      setData((d) => ({ ...d, recommendedSize, calculatedPrice }));
+    }
+  }, [data.cupsRange, data.customCups, data.coffeeProduct, data.schedule]);
+
   const isValid = useMemo(() => {
     switch (step) {
       case "cups":
@@ -315,6 +349,7 @@ export default function SubscriptionWizard({
         }
       case "schedule":
         switch (subStep) {
+          case "coffeeProduct": return !!data.coffeeProduct;
           case "frequency": return !!data.schedule;
           case "contact": {
             const nameOk = data.fullName.trim().length > 0;
@@ -379,7 +414,10 @@ export default function SubscriptionWizard({
       customCups: data.customCups,
       brewMethod: data.brewMethod as BrewMethod,
       grindPref: data.grindPref as GrindPref,
+      coffeeProduct: data.coffeeProduct as "Nguvu" | "Tunu" | "Amka",
       schedule: data.schedule as Schedule,
+      recommendedSize: data.recommendedSize,
+      calculatedPrice: data.calculatedPrice,
       fullName: data.fullName,
       email: data.email,
       phone: data.phone,
@@ -392,15 +430,13 @@ export default function SubscriptionWizard({
   // NEW: helper to auto-advance after setting a selection
   const setFieldAndAutoNext = useCallback(
     (k: keyof SubscriptionData) => (val: string) => {
-      setData((d) => ({ ...d, [k]: val }));
-      // Let React apply state before checking isValid/advancing
-      setTimeout(() => {
-        // For “brew” and “schedule” (except contact & summary), auto-advance
+      setData((d) => ({ ...d, [k]: val })); 
+      setTimeout(() => { 
         if (
+          (step === "cups" && subStep === "cups" && data.cupsRange !== "Others") ||
           (step === "brew" && ["brewMethod", "flavor", "grind"].includes(subStep)) ||
-          (step === "schedule" && ["frequency", "size"].includes(subStep))
+          (step === "schedule" && ["coffeeProduct", "frequency", "size"].includes(subStep))
         ) {
-          // Temporarily bypass isValid race by assuming this selection satisfies the subStep
           setDir(1);
           const current = subStepsMap[step];
           const idx = current.indexOf(subStep);
@@ -513,7 +549,7 @@ export default function SubscriptionWizard({
                               name="cupsRange"
                               value={opt}
                               checked={data.cupsRange === opt}
-                              onChange={setField("cupsRange")}
+                              onChange={setFieldAndAutoNext("cupsRange")}
                               label={opt}
                             />
                           ))}
@@ -539,7 +575,7 @@ export default function SubscriptionWizard({
                                 setData((d) => ({ ...d, customCups: isNaN(value) ? undefined : value }));
                               }}
                               className="w-20 px-2 py-1 border border-coffee-brown/20 rounded-md bg-white text-enzi-db text-sm outline-none focus:ring-2 focus:ring-coffee-gold/50"
-                              placeholder="6"
+                              placeholder="5"
                             />
                           </div>
                         </motion.div>
@@ -661,6 +697,33 @@ export default function SubscriptionWizard({
 
                       <div className="space-y-6">
                         <AnimatePresence mode="wait" custom={dir}>
+                          {subStep === "coffeeProduct" && (
+                            <motion.fieldset
+                              key="coffeeProduct"
+                              custom={dir}
+                              variants={variants}
+                              initial="enter"
+                              animate="center"
+                              exit="exit"
+                              transition={{ duration: 0.35, ease: "easeInOut" }}
+                            >
+                              <legend className="block text-enzi-db text-sm mb-2">Step 3 of 3: Choose your coffee</legend>
+                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                {COFFEE_OPTIONS.map((opt) => (
+                                  <RadioCard
+                                    key={opt.name}
+                                    name="coffeeProduct"
+                                    value={opt.name}
+                                    checked={data.coffeeProduct === opt.name}
+                                    onChange={setFieldAndAutoNext("coffeeProduct")}
+                                    label={opt.name}
+                                    description={`${opt.description} • ${opt.price}/250g`}
+                                  />
+                                ))}
+                              </div>
+                            </motion.fieldset>
+                          )}
+
                           {subStep === "frequency" && (
                             <motion.fieldset
                               key="frequency"
@@ -671,12 +734,12 @@ export default function SubscriptionWizard({
                               exit="exit"
                               transition={{ duration: 0.35, ease: "easeInOut" }}
                             >
-                              <legend className="block text-enzi-db text-sm mb-2">Step 3 of 3: When should your coffee arrive?</legend>
+                              <legend className="block text-enzi-db text-sm mb-2">When should your coffee arrive?</legend>
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md">
                                 {SCHEDULE_OPTIONS.map((opt) => {
                                   const cupsPerDay = getCupsPerDay(data.cupsRange, data.customCups);
                                   const recommendedSize = calculateRecommendedSize(cupsPerDay, opt);
-                                  const price = calculatePrice(cupsPerDay, opt);
+                                  const price = calculatePrice(cupsPerDay, opt, data.coffeeProduct);
                                   const smartLabel = `${opt} (${recommendedSize})`;
                                   const description = `${getSmartDescription(cupsPerDay)} • ${price}`;
                                   
@@ -786,9 +849,10 @@ export default function SubscriptionWizard({
                                 </div>
                               </div>
                               <ul className="text-sm text-enzi-db grid grid-cols-1 sm:grid-cols-2 gap-y-1">
-                                <li><strong>Cups/week:</strong> {data.cupsRange === "Others" ? `${data.customCups || 0} cups/day` : data.cupsRange || "—"}</li>
+                                <li><strong>Cups/week:</strong> {data.cupsRange === "Others" && data.customCups ? `${data.customCups} cups/day` : data.cupsRange || "—"}</li>
                                 <li><strong>Brew:</strong> {data.brewMethod || "—"}</li>
                                 <li><strong>Grind:</strong> {data.grindPref}{data.autoGrindNote ? ` — ${data.autoGrindNote}` : ""}</li>
+                                <li><strong>Coffee:</strong> {data.coffeeProduct || "—"}</li>
                                 <li><strong>Frequency:</strong> {data.schedule ? (() => {
                                   const cupsPerDay = getCupsPerDay(data.cupsRange, data.customCups);
                                   const recommendedSize = calculateRecommendedSize(cupsPerDay, data.schedule as Schedule);

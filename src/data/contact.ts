@@ -10,17 +10,20 @@ export const ContactSchema = z.object({
 export type ContactType = z.infer<typeof ContactSchema>;
 
 // Subscription types and schema
-export type CupsRange = "1 to 2" | "2 to 4" | "5 - 7" | "Others";
+export type CupsRange = "1 cup a day" | "A cup every other day" | "Two or more cups a day" | "Others";
 export type BrewMethod = "Espresso" | "Pour-Over" | "French Press" | "Cold Brew";
 export type GrindPref = "Whole Bean" | "Ground";
-export type Schedule = "Every 2 weeks" | "Every 4 weeks";
+export type Schedule = "Every 4 weeks";
 
 export const SubscriptionSchema = z.object({
-  cupsRange: z.enum(["1 to 2", "2 to 4", "5 - 7", "Others"]),
+  cupsRange: z.enum(["1 cup a day", "A cup every other day", "Two or more cups a day", "Others"]),
   customCups: z.number().optional(),
   brewMethod: z.enum(["Espresso", "Pour-Over", "French Press", "Cold Brew"]),
   grindPref: z.enum(["Whole Bean", "Ground"]),
-  schedule: z.enum(["Every 2 weeks", "Every 4 weeks"]),
+  coffeeProduct: z.enum(["Nguvu", "Tunu", "Amka"]),
+  schedule: z.enum(["Every 4 weeks"]),
+  recommendedSize: z.string().optional(),
+  calculatedPrice: z.string().optional(),
   fullName: z.string().min(1, 'Full name is required'),
   email: z.string().email('Please enter a valid email address'),
   phone: z.string().optional(),
