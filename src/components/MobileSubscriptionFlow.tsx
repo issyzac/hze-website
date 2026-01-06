@@ -49,7 +49,6 @@ const BREW_OPTIONS: BrewMethod[] = ["Espresso", "Pour-Over", "French Press", "Co
 const GRIND_OPTIONS: GrindPref[] = ["Whole Bean", "Ground"];
 const SCHEDULE_OPTIONS: Schedule[] = ["Every 4 weeks"];
 const COFFEE_PRODUCTS = [
-  { name: "Nguvu" as CoffeeProduct, price: "TSH 18,000 / 250g", flavorNotes: "Hazelnut, vanilla, smooth" },
   { name: "Tunu" as CoffeeProduct, price: "TSH 22,000 / 250g", flavorNotes: "Vanilla, rich, bold" },
   { name: "Amka" as CoffeeProduct, price: "TSH 15,000 / 250g", flavorNotes: "Balanced, smooth, mild" }
 ];
@@ -337,6 +336,26 @@ export default function MobileSubscriptionFlow({ isOpen, onClose }: Subscription
     // Use mutation directly to submit the data
     mutation.mutate(formData);
   };
+
+  // Track previous values to detect when a selection is made
+  const [prevData, setPrevData] = useState<SubscriptionData>(data);
+  
+  // Auto-advance to next screen when valid selection is made
+  useEffect(() => {
+    const hasNewSelection = 
+      (screen === "cups" && data.cupsRange !== prevData.cupsRange) ||
+      (screen === "brewMethod" && data.brewMethod !== prevData.brewMethod) ||
+      (screen === "grind" && data.grindPref !== prevData.grindPref) ||
+      (screen === "coffeeProduct" && data.coffeeProduct !== prevData.coffeeProduct) ||
+      (screen === "frequency" && data.schedule !== prevData.schedule) ||
+      (screen === "cups" && data.customCups !== prevData.customCups);
+
+    if (hasNewSelection && isValid && autoNextOnChoice(screen)) {
+      setTimeout(() => next(), 400);
+    }
+    
+    setPrevData(data);
+  }, [data, screen, isValid]);
 
   if (!isOpen) return null;
 
@@ -682,12 +701,12 @@ export default function MobileSubscriptionFlow({ isOpen, onClose }: Subscription
 
 function SummaryRow({ label, value, onEdit }: { label: string; value: string; onEdit: () => void }) {
   return (
-    <button onClick={onEdit} className="w-full px-4 py-3 flex items-center justify-between" style={{ color: "#3B2A1F" }}>
-      <div>
+    <button onClick={onEdit} className="w-full px-4 py-3 flex items-center justify-between text-left" style={{ color: "#3B2A1F" }}>
+      <div className="flex-1">
         <div className="text-xs" style={{ color: "#3B2A1F99" }}>{label}</div>
         <div className="text-sm mt-0.5">{value}</div>
       </div>
-      <ChevronRight className="h-4 w-4" style={{ color: "#3B2A1F80" }} />
+      <ChevronRight className="h-4 w-4 ml-3 flex-shrink-0" style={{ color: "#3B2A1F80" }} />
     </button>
   );
 }

@@ -14,7 +14,7 @@ interface SubscriptionData {
   brewMethod: BrewMethod | "";
   grindPref: GrindPref | "";
   autoGrindNote?: string;
-  coffeeProduct: "Nguvu" | "Tunu" | "Amka" | "";
+  coffeeProduct: "Tunu" | "Amka" | "";
   schedule: Schedule | "";
   recommendedSize?: string;
   calculatedPrice?: string;
@@ -41,7 +41,6 @@ const CUP_OPTIONS: CupsRange[] = ["1 cup a day", "A cup every other day", "Two o
 const BREW_OPTIONS: BrewMethod[] = ["Espresso", "Pour-Over", "French Press", "Cold Brew"];
 const GRIND_OPTIONS: GrindPref[] = ["Whole Bean", "Ground"];
 const COFFEE_OPTIONS = [
-  { name: "Nguvu", description: "Medium roast with hazelnut", price: "TSH 18,000" },
   { name: "Tunu", description: "Dark roast with vanilla", price: "TSH 22,000" },
   { name: "Amka", description: "Decaf blend", price: "TSH 15,000" }
 ] as const;
