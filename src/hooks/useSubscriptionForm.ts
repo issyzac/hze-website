@@ -31,13 +31,12 @@ export const useSubscriptionForm = () => {
                 calculatedPrice: data.calculatedPrice,
                 fullName: data.fullName,
                 email: data.email,
-                phone: data.phone || '',
-                timestamp: new Date().toISOString(),
+                phone: data.phone || '', 
             };
 
             console.log('Subscription Data:', subscriptionData);
 
-            const response = await axios.post('https://loyaserver.enzi.coffee/api/subscriptions/', subscriptionData, { 
+            const response = await axios.post('http://localhost:8000/api/subscriptions/', subscriptionData, { 
                 headers: {
                     'Content-Type': 'application/json',
                 },

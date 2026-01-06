@@ -40,8 +40,7 @@ export default function AboutUs({
             <h2 className="text-coffee-brown font-['GTAlpinaThin'] leading-tight text-4xl sm:text-5xl md:text-6xl mb-6">
               {heading}
             </h2>
-            <p className="text-enzi-db text-lg sm:text-xl font-['RoobertRegular'] leading-8 sm:leading-9 max-w-2xl">
-               <div className="space-y-8">
+            <div className="space-y-8">
               {body?.map((item, index) => (
                 <div key={index} className="space-y-2">
                   <h3 className="text-coffee-brown font-['RoobertMedium'] text-xl sm:text-2xl">
@@ -53,7 +52,6 @@ export default function AboutUs({
                 </div>
               ))}
             </div>
-            </p>
           </div>
            <div className="lg:col-span-6">
             <div className="overflow-hidden shadow-sm border border-coffee-brown/15">
