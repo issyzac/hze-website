@@ -4,6 +4,8 @@ import { ChevronRight, ChevronLeft, X } from "lucide-react";
 import { useSubscriptionForm } from "../hooks/useSubscriptionForm";
 import { type CupsRange, type BrewMethod, type GrindPref, type Schedule } from "../data/contact";
 
+type CoffeeProduct = "Nguvu" | "Tunu" | "Amka";
+
 // ------------------------------------------------------
 // Types
 // ------------------------------------------------------
@@ -12,6 +14,7 @@ interface SubscriptionData {
   customCups?: number;
   brewMethod: BrewMethod | "";
   grindPref: GrindPref | "";
+  coffeeProduct: CoffeeProduct | "";
   autoGrindNote?: string;
   schedule: Schedule | "";
   fullName: string;
@@ -21,22 +24,7 @@ interface SubscriptionData {
 
 // Brand colors (focus on LOOKS only)
 const PRIMARY = "#B47744";    
-const SECONDARY = "#EEEBE7"; 
-
-// ------------------------------------------------------
-// Types
-// ------------------------------------------------------
-interface SubscriptionData {
-  cupsRange: CupsRange | "";
-  customCups?: number;
-  brewMethod: BrewMethod | "";
-  grindPref: GrindPref | "";
-  autoGrindNote?: string;
-  schedule: Schedule | "";
-  fullName: string;
-  email: string;
-  phone?: string;
-}
+const SECONDARY = "#EEEBE7";
 
 export interface SubscriptionWizardProps {
   isOpen: boolean;
@@ -56,10 +44,15 @@ function isValidPhone(s: string) {
   return digits.length >= 6 && digits.length <= 20;
 }
 
-const CUP_OPTIONS: CupsRange[] = ["1 to 2", "2 to 4", "5 - 7", "Others"];
+const CUP_OPTIONS: CupsRange[] = ["1 cup a day", "A cup every other day", "Two or more cups a day", "Others"];
 const BREW_OPTIONS: BrewMethod[] = ["Espresso", "Pour-Over", "French Press", "Cold Brew"];
 const GRIND_OPTIONS: GrindPref[] = ["Whole Bean", "Ground"];
-const SCHEDULE_OPTIONS: Schedule[] = ["Every 2 weeks", "Every 4 weeks"];
+const SCHEDULE_OPTIONS: Schedule[] = ["Every 4 weeks"];
+const COFFEE_PRODUCTS = [
+  { name: "Nguvu" as CoffeeProduct, price: "TSH 18,000 / 250g", flavorNotes: "Hazelnut, vanilla, smooth" },
+  { name: "Tunu" as CoffeeProduct, price: "TSH 22,000 / 250g", flavorNotes: "Vanilla, rich, bold" },
+  { name: "Amka" as CoffeeProduct, price: "TSH 15,000 / 250g", flavorNotes: "Balanced, smooth, mild" }
+];
 
 // Shared card base using SECONDARY with subtle border
 const cardBase = `rounded-2xl border px-4 py-3 transition focus-within:ring-2`;
@@ -73,7 +66,7 @@ const brewToGrindMap: Record<BrewMethod, string> = {
 
 function calculateRecommendedSize(cupsPerDay: number, frequency: Schedule): string {
   const gramsPerCup = 20;
-  const daysInPeriod = frequency === "Every 2 weeks" ? 14 : 28;
+  const daysInPeriod = 28; // Every 4 weeks
   
   const totalGramsNeeded = cupsPerDay * gramsPerCup * daysInPeriod;
   
@@ -97,7 +90,7 @@ function calculateRecommendedSize(cupsPerDay: number, frequency: Schedule): stri
 
 function calculatePrice(cupsPerDay: number, frequency: Schedule): string {
   const gramsPerCup = 20;
-  const daysInPeriod = frequency === "Every 2 weeks" ? 14 : 28;
+  const daysInPeriod = 28; // Every 4 weeks
   
   const totalGramsNeeded = cupsPerDay * gramsPerCup * daysInPeriod;
   const totalWithBuffer = Math.ceil(totalGramsNeeded * 1.15);
@@ -121,9 +114,9 @@ function getCupsPerDay(cupsRange: CupsRange | "", customCups?: number): number {
   }
   
   switch (cupsRange) {
-    case "1 to 2": return 1.5;   
-    case "2 to 4": return 3;     
-    case "5 - 7": return 6; 
+    case "1 cup a day": return 1;   
+    case "A cup every other day": return 0.5;     
+    case "Two or more cups a day": return 3; 
     default: return 2;           
   }
 }
@@ -209,6 +202,7 @@ export default function MobileSubscriptionFlow({ isOpen, onClose }: Subscription
     | "cups"
     | "brewMethod"
     | "grind"
+    | "coffeeProduct"
     | "frequency"
     | "contact"
     | "summary";
@@ -217,6 +211,7 @@ export default function MobileSubscriptionFlow({ isOpen, onClose }: Subscription
     "cups",
     "brewMethod",
     "grind",
+    "coffeeProduct",
     "frequency",
     "contact",
     "summary",
@@ -230,6 +225,7 @@ export default function MobileSubscriptionFlow({ isOpen, onClose }: Subscription
     customCups: undefined,
     brewMethod: "",
     grindPref: "",
+    coffeeProduct: "",
     autoGrindNote: "",
     schedule: "",
     fullName: "",
@@ -246,6 +242,7 @@ export default function MobileSubscriptionFlow({ isOpen, onClose }: Subscription
         customCups: undefined,
         brewMethod: "",
         grindPref: "",
+        coffeeProduct: "",
         autoGrindNote: "",
         schedule: "",
         fullName: "",
@@ -286,6 +283,8 @@ export default function MobileSubscriptionFlow({ isOpen, onClose }: Subscription
         return !!data.brewMethod;
       case "grind":
         return !!data.grindPref;
+      case "coffeeProduct":
+        return !!data.coffeeProduct;
       case "frequency":
         return !!data.schedule;
       case "contact":
@@ -300,7 +299,7 @@ export default function MobileSubscriptionFlow({ isOpen, onClose }: Subscription
   }, [screen, data]);
 
   const autoNextOnChoice = (s: Screen) =>
-    ["cups", "brewMethod", "grind", "frequency"].includes(s);
+    ["cups", "brewMethod", "grind", "coffeeProduct", "frequency"].includes(s);
 
   const next = () => {
     const i = order.indexOf(screen);
@@ -315,13 +314,21 @@ export default function MobileSubscriptionFlow({ isOpen, onClose }: Subscription
   const submit = async () => {
     if (!isValid || screen !== "summary") return;
 
+    // Calculate recommended size and price
+    const cupsPerDay = getCupsPerDay(data.cupsRange, data.customCups);
+    const recommendedSize = calculateRecommendedSize(cupsPerDay, data.schedule as Schedule);
+    const calculatedPrice = calculatePrice(cupsPerDay, data.schedule as Schedule);
+
     // Convert component data to hook format
     const formData = {
       cupsRange: data.cupsRange as CupsRange,
       customCups: data.customCups,
       brewMethod: data.brewMethod as BrewMethod,
       grindPref: data.grindPref as GrindPref,
+      coffeeProduct: data.coffeeProduct as CoffeeProduct,
       schedule: data.schedule as Schedule,
+      recommendedSize,
+      calculatedPrice,
       fullName: data.fullName,
       email: data.email,
       phone: data.phone,
@@ -470,6 +477,47 @@ export default function MobileSubscriptionFlow({ isOpen, onClose }: Subscription
             </motion.section>
           )}
 
+          {screen === "coffeeProduct" && (
+            <motion.section key="coffeeProduct" custom={dir} variants={variants} initial="enter" animate="center" exit="exit" transition={t}>
+              <h2 className="text-xl font-bold" style={{ color: "#3B2A1F" }}>Choose your coffee</h2>
+              <p className="mt-2 text-sm" style={{ color: "#3B2A1FCC" }}>Select the coffee that matches your taste preferences.</p>
+              <div className="mt-4 grid gap-3">
+                {COFFEE_PRODUCTS.map((opt) => (
+                  <label
+                    key={opt.name}
+                    className="flex items-center justify-between w-full rounded-2xl px-4 py-4"
+                    style={{
+                      backgroundColor: "#FFFFFF",
+                      border: `1px solid ${PRIMARY}20`,
+                    }}
+                  >
+                    <span style={{ color: "#3B2A1F" }} className="flex-1">
+                      <span className="block font-medium">{opt.name}</span>
+                      <span className="block text-sm mt-0.5" style={{ color: "#3B2A1F80" }}>
+                        {opt.flavorNotes}
+                      </span>
+                      <span className="block text-sm mt-1" style={{ color: "#3B2A1F99" }}>
+                        {opt.price}
+                      </span>
+                    </span>
+                    <input
+                      type="radio"
+                      name="coffeeProduct"
+                      value={opt.name}
+                      checked={data.coffeeProduct === opt.name}
+                      onChange={(e) => {
+                        setField("coffeeProduct")(e.target.value);
+                        if (autoNextOnChoice("coffeeProduct")) setTimeout(next, 0);
+                      }}
+                      className="h-5 w-5"
+                      style={{ accentColor: PRIMARY }}
+                    />
+                  </label>
+                ))}
+              </div>
+            </motion.section>
+          )}
+
           {screen === "frequency" && (
             <motion.section key="freq" custom={dir} variants={variants} initial="enter" animate="center" exit="exit" transition={t}>
               <h2 className="text-xl font-bold" style={{ color: "#3B2A1F" }}>Step 3 of 3: When should your coffee arrive?</h2>
@@ -554,6 +602,7 @@ export default function MobileSubscriptionFlow({ isOpen, onClose }: Subscription
                 <SummaryRow label="Cups / day" value={data.cupsRange === "Others" ? `${data.customCups || 0} cups/day` : data.cupsRange || "—"} onEdit={() => go("cups")} />
                 <SummaryRow label="Brew" value={data.brewMethod || "—"} onEdit={() => go("brewMethod")} />
                 <SummaryRow label="Grind" value={`${data.grindPref || "—"}${data.autoGrindNote ? ` — ${data.autoGrindNote}` : ""}`} onEdit={() => go("grind")} />
+                <SummaryRow label="Coffee" value={data.coffeeProduct || "—"} onEdit={() => go("coffeeProduct")} />
                 <SummaryRow label="Frequency" value={data.schedule ? (() => {
                   const cupsPerDay = getCupsPerDay(data.cupsRange, data.customCups);
                   const recommendedSize = calculateRecommendedSize(cupsPerDay, data.schedule as Schedule);

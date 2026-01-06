@@ -36,7 +36,7 @@ export const useSubscriptionForm = () => {
 
             console.log('Subscription Data:', subscriptionData);
 
-            const response = await axios.post('http://localhost:8000/api/subscriptions/', subscriptionData, { 
+            const response = await axios.post('https://loyaserver.enzi.coffee/api/subscriptions/', subscriptionData, { 
                 headers: {
                     'Content-Type': 'application/json',
                 },
