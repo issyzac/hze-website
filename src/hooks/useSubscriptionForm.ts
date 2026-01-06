@@ -5,6 +5,10 @@ import toast from 'react-hot-toast';
 import axios from 'axios';
 import { SubscriptionSchema, type SubscriptionType } from '../data/contact';
 
+// In your frontend config
+const API_URL = 'https://keyword-relative-coordinator-partner.trycloudflare.com/api';
+// const API_URL = 'https://loyaserver.enzi.coffee/api';
+
 export const useSubscriptionForm = () => {
     const {
         register,
@@ -36,7 +40,7 @@ export const useSubscriptionForm = () => {
 
             console.log('Subscription Data:', subscriptionData);
 
-            const response = await axios.post('https://loyaserver.enzi.coffee/api/subscriptions/', subscriptionData, { 
+            const response = await axios.post(`${API_URL}/subscriptions/`, subscriptionData, { 
                 headers: {
                     'Content-Type': 'application/json',
                 },
