@@ -2,8 +2,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import axios from 'axios';
 import { OrderSchema, type OrderType } from '../data/contact';
+import { supabase } from '../lib/supabase';
 
 export const useOrderForm = () => {
     const {
@@ -20,22 +20,27 @@ export const useOrderForm = () => {
 
     const mutation = useMutation({
         mutationFn: async (data: OrderType) => {
-            const orderData = {
-                productName: data.productId,
+            const dbData = {
+                product_name: data.productId,
                 quantity: data.quantity,
-                fullName: data.fullName,
-                email: data.email || '', 
-                phone: data.phone || '',
-                note: data.note || '',
-                timestamp: new Date().toISOString(),
+                full_name: data.fullName,
+                email: data.email || null,
+                phone: data.phone || null,
+                note: data.note || null,
             };
-            const response = await axios.post('https://loyaserver.enzi.coffee/api/orders/', orderData, {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
 
-            return response.data;
+            console.log('Submitting Order to Supabase:', dbData);
+
+            const { data: result, error } = await supabase
+                .from('orders')
+                .insert([dbData])
+                .select();
+
+            if (error) {
+                throw error;
+            }
+
+            return result;
         },
         onSuccess: () => {
             toast.success('🎉 Thank you for your order! We\'ll send you a confirmation email shortly.', {

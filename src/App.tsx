@@ -15,6 +15,8 @@ import { mockHeroData, mockProducts } from './data/mockData'
 import { useIsMobile } from './hooks/useIsMobile'
 import ProblemStatement from './components/ProblemStatement';
 import ContactUs from './components/ContactUs'
+import EventsSection from './components/EventsSection'
+
 
 function App() {
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
@@ -74,6 +76,9 @@ function App() {
 
         {/* Reviews Section */}
         <CustomerReviews />
+
+        {/* Events Section */}
+        <EventsSection />
 
         {/* Contact Section */}
         <ContactUs />
