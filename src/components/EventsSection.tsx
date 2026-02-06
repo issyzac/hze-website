@@ -1,9 +1,10 @@
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, MapPin, Clock } from 'lucide-react';
-import { events, type Event } from '../data/events';
+import { type Event } from '../data/events';
 import { useIsMobile } from '../hooks/useIsMobile';
+import { useEvents } from '../hooks/useEvents';
 
 // --- Types & Constants ---
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -148,17 +149,25 @@ const EmptyState = ({ date }: { date: Date }) => (
 // --- Main Component ---
 const EventsSection = () => {
     const isMobile = useIsMobile();
+    const { data: events = [], isLoading } = useEvents();
     
-    // Determine initial date based on first event or today
-    const firstEventDate = events.length > 0 ? parseEventDate(events[0].date) : new Date();
-    // Default to viewing the month of the first event if it's in the future, otherwise today
-    const initialViewDate = firstEventDate > new Date() ? firstEventDate : new Date();
+    const [viewDate, setViewDate] = useState(new Date());
+    const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
-    const [viewDate, setViewDate] = useState(initialViewDate);
-    // Select the first event's date initially if available
-    const [selectedDate, setSelectedDate] = useState<Date>(
-        events.length > 0 ? parseEventDate(events[0].date) : new Date()
-    );
+    // Update state when events are loaded
+    useEffect(() => {
+        if (!isLoading && events.length > 0) {
+            const firstDate = parseEventDate(events[0].date);
+            // If the first event is in the future, view that month, otherwise view current month
+            const initialView = firstDate > new Date() ? firstDate : new Date();
+            setViewDate(initialView);
+            setSelectedDate(firstDate);
+        } else if (!isLoading && events.length === 0) {
+            // If no events, default to today
+            setViewDate(new Date());
+            setSelectedDate(new Date());
+        }
+    }, [events, isLoading]);
 
     const currentYear = viewDate.getFullYear();
     const currentMonth = viewDate.getMonth();
