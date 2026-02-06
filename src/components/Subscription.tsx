@@ -62,7 +62,7 @@ function getCoffeePrice(coffeeProduct: string): number {
   }
 }
 
-function calculateRecommendedSize(cupsPerDay: number, frequency: Schedule): string {
+function calculateRecommendedSize(cupsPerDay: number, _frequency: Schedule): string {
   const gramsPerCup = 20;
   const daysInPeriod = 28; // Every 4 weeks
   
@@ -86,7 +86,7 @@ function calculateRecommendedSize(cupsPerDay: number, frequency: Schedule): stri
   }
 }
 
-function calculatePrice(cupsPerDay: number, frequency: Schedule, coffeeProduct: string): string {
+function calculatePrice(cupsPerDay: number, _frequency: Schedule, coffeeProduct: string): string {
   const gramsPerCup = 20;
   const daysInPeriod = 28; // Every 4 weeks
   
