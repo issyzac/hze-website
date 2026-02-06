@@ -2,12 +2,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import axios from 'axios';
 import { SubscriptionSchema, type SubscriptionType } from '../data/contact';
-
-// In your frontend config
-const API_URL = 'https://keyword-relative-coordinator-partner.trycloudflare.com/api';
-// const API_URL = 'https://loyaserver.enzi.coffee/api';
+import { supabase } from '../lib/supabase';
 
 export const useSubscriptionForm = () => {
     const {
@@ -23,30 +19,34 @@ export const useSubscriptionForm = () => {
     });
 
     const mutation = useMutation({
-        mutationFn: async (data: SubscriptionType) => { 
-            const subscriptionData = {
-                cupsRange: data.cupsRange,
-                customCups: data.customCups,
-                brewMethod: data.brewMethod,
-                grindPref: data.grindPref,
-                coffeeProduct: data.coffeeProduct,
+        mutationFn: async (data: SubscriptionType) => {
+            // Map frontend camelCase to DB snake_case
+            const dbData = {
+                cups_range: data.cupsRange,
+                custom_cups: data.customCups,
+                brew_method: data.brewMethod,
+                grind_pref: data.grindPref,
+                coffee_product: data.coffeeProduct,
                 schedule: data.schedule,
-                recommendedSize: data.recommendedSize,
-                calculatedPrice: data.calculatedPrice,
-                fullName: data.fullName,
+                recommended_size: data.recommendedSize,
+                calculated_price: data.calculatedPrice,
+                full_name: data.fullName,
                 email: data.email,
-                phone: data.phone || '', 
+                phone: data.phone || null,
             };
 
-            console.log('Subscription Data:', subscriptionData);
+            console.log('Submitting to Supabase:', dbData);
 
-            const response = await axios.post(`${API_URL}/subscriptions/`, subscriptionData, { 
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
+            const { data: result, error } = await supabase
+                .from('subscriptions')
+                .insert([dbData])
+                .select();
 
-            return response.data;
+            if (error) {
+                throw error;
+            }
+
+            return result;
         },
         onSuccess: () => {
             toast.success('🎉 Thank you for subscribing! Your coffee subscription has been created successfully. We\'ll send you a confirmation email shortly.', {
