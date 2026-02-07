@@ -5,16 +5,34 @@ import { type Event } from '../data/events';
 
 // Map DB snake_case to frontend camelCase
 const mapEventFromDB = (dbEvent: any): Event => {
-    // Manually parse YYYY-MM-DD to avoid timezone issues
-    // dbEvent.date is expected to be "2026-02-14"
-    const [year, month, day] = dbEvent.date.split('-').map(Number);
+    // Handle both "2026-02-14" and "2026-02-14T14:00:00" formats
+    let dateStrRaw = dbEvent.date;
+    if (dateStrRaw && dateStrRaw.includes('T')) {
+        dateStrRaw = dateStrRaw.split('T')[0];
+    }
 
-    // Create date object (Middle of day to be safe, but we really just want the string)
-    // Actually, let's just construct the string directly to match exactly what the UI parser expects: "Month DD, YYYY"
+    // Now convert YYYY-MM-DD to "Month DD, YYYY"
+    const [year, month, day] = dateStrRaw.split('-').map((val: string) => parseInt(val, 10));
+
     const monthNames = [
         "January", "February", "March", "April", "May", "June",
         "July", "August", "September", "October", "November", "December"
     ];
+
+    // Safety check
+    if (!year || !month || !day || month < 1 || month > 12) {
+        console.warn('Invalid date format from DB:', dbEvent.date);
+        return {
+            id: dbEvent.id,
+            title: dbEvent.title,
+            date: 'Invalid Date',
+            time: dbEvent.time,
+            description: dbEvent.description,
+            location: dbEvent.location,
+            type: dbEvent.type,
+            registrationLink: dbEvent.registration_link
+        };
+    }
 
     const dateStr = `${monthNames[month - 1]} ${day}, ${year}`;
 
