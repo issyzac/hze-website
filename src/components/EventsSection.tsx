@@ -186,7 +186,7 @@ const EventsSection = () => {
             map.set(key, [...existing, e]);
         });
         return map;
-    }, []);
+    }, [events]);
 
     const handlePrevMonth = () => {
         setViewDate(new Date(currentYear, currentMonth - 1, 1));
