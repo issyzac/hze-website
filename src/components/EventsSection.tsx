@@ -180,7 +180,7 @@ const EventsSection = () => {
             className="uppercase text-ink text-2xl sm:text-3xl mb-5"
             style={{ fontFamily: "var(--font-condensed)", fontWeight: 700 }}
           >
-            Kila wiki — weekly rhythms
+            Kila mwezi — monthly rhythm
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             {RHYTHMS.map((r) => (

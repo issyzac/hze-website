@@ -4,7 +4,6 @@ import HeroSection from './components/HeroSection'
 import ProductHighlights from './components/ProductHighlights'
 import OurStory from './components/OurStory'
 import OurValues from './components/OurValues'
-import CustomerReviews from './components/CustomerReview'
 import SubscriptionWizard from './components/Subscription'
 import MobileSubscriptionFlow from './components/MobileSubscriptionFlow'
 import OrderFlow from './components/OrderFlow'
@@ -85,11 +84,8 @@ function App() {
         {/* Events Section */}
         <EventsSection />
 
-        {/* Contact Section */}
+        {/* Contact + Reviews Section */}
         <ContactUs />
-
-        {/* Reviews Section — last word goes to the customers */}
-        <CustomerReviews />
       </main>
 
       <Footer />
