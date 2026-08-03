@@ -101,7 +101,7 @@ export default function ContactUs() {
             Karibu — Visit Us
           </h2>
           <p className="font-display font-light italic text-bronze-deep text-xl">
-            HZE Mbezi, Dar es Salaam · Monday – Saturday, 7:30 AM – 10:00 PM
+            HZE Mbezi &amp; HZE Victoria, Dar es Salaam · Monday – Saturday, 7:30 AM – 10:00 PM
           </p>
         </motion.div>
 

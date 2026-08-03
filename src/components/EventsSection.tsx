@@ -105,10 +105,10 @@ const EventsSection = () => {
             className="uppercase text-ink text-5xl sm:text-7xl leading-[0.95]"
             style={{ fontFamily: "var(--font-condensed)", fontWeight: 700 }}
           >
-            Zinazokuja
+            Events Zinazokuja
           </h2>
           <p className="mt-2 font-display font-light italic text-bronze-deep text-xl sm:text-2xl">
-            What's brewing at the café
+            Our Events Calendar
           </p>
         </motion.div>
 

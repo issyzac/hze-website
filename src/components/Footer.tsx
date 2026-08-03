@@ -96,7 +96,7 @@ export default function Footer({
               Visit
             </h3>
             <address className="not-italic font-['RoobertRegular'] text-coffee-cream/80 leading-7">
-              HZE Mbezi
+              HZE Mbezi · HZE Victoria
               <br />
               Dar es Salaam, Tanzania
             </address>
