@@ -23,11 +23,10 @@ export default function Header({
 
   const nav = [
     { name: "Home", href: "#home" },
-    { name: "About", href: "#who-we-are" },
-    { name: "Values", href: "#our-values" },
+    { name: "Shop", href: "#products" },
     { name: "Stories", href: "#our-story" },
-    { name: "Impact", href: "#impact" },
-    { name: "Contact Us", href: "#contact" },
+    { name: "Events", href: "#events" },
+    { name: "Visit Us", href: "#contact" },
   ];
 
   const handleNav = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {

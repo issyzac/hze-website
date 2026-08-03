@@ -1,142 +1,91 @@
-import { motion } from 'framer-motion';
-import { useContactForm } from '../hooks/useContactForm';
+import { useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import { openWhatsApp } from "../lib/whatsapp";
+
+const easeSoft = [0.25, 1, 0.5, 1] as const;
 
 export default function ContactUs() {
-  const { register, onSubmit, errors, isValid, mutation } = useContactForm();
+  const reduceMotion = useReducedMotion();
+  const [name, setName] = useState("");
+  const [message, setMessage] = useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const text = `Habari HZE! ${message.trim() || "Nataka kuwasiliana nanyi."} — ${name.trim() || "___"}`;
+    openWhatsApp(text);
+  };
 
   return (
     <section id="contact" className="py-16 px-4 bg-[#F7F3ED]">
       <div className="max-w-4xl mx-auto">
         <motion.div
-          className="text-center mb-12"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          className="text-center mb-10"
+          initial={reduceMotion ? undefined : { opacity: 0, y: 20 }}
+          whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.6, ease: easeSoft }}
         >
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-['GTAlpinaThin'] text-coffee-dark mb-6">
-            Contact Us
+          <h2
+            className="uppercase text-ink text-5xl sm:text-6xl leading-[0.95] mb-3"
+            style={{ fontFamily: "var(--font-condensed)", fontWeight: 700 }}
+          >
+            Karibu — Visit Us
           </h2>
-          <p className="text-lg text-coffee-brown font-['RoobertRegular'] mb-8">
-            Get in touch with Harakati za Enzi Roastery
+          <p className="font-display font-light italic text-bronze-deep text-xl">
+            HZE Mbezi, Dar es Salaam · Monday – Saturday, 7:30 AM – 10:00 PM
           </p>
         </motion.div>
 
         <motion.div
           className="max-w-2xl mx-auto"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={reduceMotion ? undefined : { opacity: 0, y: 20 }}
+          whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.2 }}
+          transition={{ duration: 0.6, ease: easeSoft, delay: 0.15 }}
         >
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-coffee-brown/20 shadow-lg p-8">
-            <p className="text-coffee-dark leading-relaxed mb-8 font-['RoobertRegular'] text-center">
-              Have questions about our coffee or want to place a custom order?
-              We'd love to hear from you!
+          <form
+            onSubmit={handleSubmit}
+            className="bg-white/80 border border-bronze-deep/20 shadow-sm p-6 sm:p-8 space-y-5"
+          >
+            <div>
+              <label htmlFor="contact-name" className="block text-sm font-sans font-medium text-ink mb-2">
+                Jina lako — your name
+              </label>
+              <input
+                id="contact-name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Andika jina lako"
+                className="w-full px-4 py-3 border-2 border-bronze-deep/20 focus:border-enzi-db focus:outline-none font-sans"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="contact-message" className="block text-sm font-sans font-medium text-ink mb-2">
+                Ujumbe wako — your message
+              </label>
+              <textarea
+                id="contact-message"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                rows={4}
+                placeholder="Kahawa, events, wholesale — chochote!"
+                className="w-full px-4 py-3 border-2 border-bronze-deep/20 focus:border-enzi-db focus:outline-none font-sans resize-vertical"
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="btn-press w-full inline-flex items-center justify-center gap-2 py-4 px-6 bg-hze-teal text-white font-sans font-medium text-lg rounded-full hover:bg-[#236458] transition-colors min-h-[56px]"
+            >
+              Endelea kwa WhatsApp <span aria-hidden>→</span>
+            </button>
+
+            <p className="text-center font-sans text-sm text-ink/50">
+              Inafungua WhatsApp na ujumbe wako tayari umeandikwa.
             </p>
-
-            <form onSubmit={onSubmit} className="space-y-6">
-              {/* Full Name */}
-              <div>
-                <label htmlFor="fullname" className="block text-sm font-['RoobertMedium'] text-coffee-brown mb-2">
-                  Full Name *
-                </label>
-                <input
-                  type="text"
-                  id="fullname"
-                  {...register('fullname')}
-                  className={`w-full px-4 py-3 rounded-xl border font-['RoobertRegular'] focus:outline-none focus:ring-2 focus:ring-coffee-gold transition-colors ${
-                    errors.fullname
-                      ? 'border-red-300 focus:ring-red-500'
-                      : 'border-coffee-brown/20 focus:border-coffee-gold'
-                  }`}
-                  placeholder="Enter your full name"
-                />
-                {errors.fullname && (
-                  <p className="mt-1 text-sm text-red-600">{errors.fullname.message}</p>
-                )}
-              </div>
-
-              {/* Email and Phone Row */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="email" className="block text-sm font-['RoobertMedium'] text-coffee-brown mb-2">
-                    Email *
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    {...register('email')}
-                    className={`w-full px-4 py-3 rounded-xl border font-['RoobertRegular'] focus:outline-none focus:ring-2 focus:ring-coffee-gold transition-colors ${
-                      errors.email
-                        ? 'border-red-300 focus:ring-red-500'
-                        : 'border-coffee-brown/20 focus:border-coffee-gold'
-                    }`}
-                    placeholder="your@email.com"
-                  />
-                  {errors.email && (
-                    <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label htmlFor="phone" className="block text-sm font-['RoobertMedium'] text-coffee-brown mb-2">
-                    Phone
-                  </label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    {...register('phone')}
-                    className={`w-full px-4 py-3 rounded-xl border font-['RoobertRegular'] focus:outline-none focus:ring-2 focus:ring-coffee-gold transition-colors ${
-                      errors.phone
-                        ? 'border-red-300 focus:ring-red-500'
-                        : 'border-coffee-brown/20 focus:border-coffee-gold'
-                    }`}
-                    placeholder="+255 712 345 678"
-                  />
-                  {errors.phone && (
-                    <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Message */}
-              <div>
-                <label htmlFor="message" className="block text-sm font-['RoobertMedium'] text-coffee-brown mb-2">
-                  Message *
-                </label>
-                <textarea
-                  id="message"
-                  {...register('message')}
-                  rows={5}
-                  className={`w-full px-4 py-3 rounded-xl border font-['RoobertRegular'] focus:outline-none focus:ring-2 focus:ring-coffee-gold transition-colors resize-vertical ${
-                    errors.message
-                      ? 'border-red-300 focus:ring-red-500'
-                      : 'border-coffee-brown/20 focus:border-coffee-gold'
-                  }`}
-                  placeholder="Tell us about your coffee preferences, custom order, or any questions you have..."
-                />
-                {errors.message && (
-                  <p className="mt-1 text-sm text-red-600">{errors.message.message}</p>
-                )}
-              </div>
-
-              {/* Submit Button */}
-              <motion.button
-                type="submit"
-                disabled={mutation.isPending || !isValid}
-                className={`w-full py-4 px-6 rounded-xl font-['RoobertMedium'] text-white shadow-sm transition-all duration-200 ${
-                  mutation.isPending || !isValid
-                    ? 'bg-coffee-brown/60 cursor-not-allowed'
-                    : 'bg-coffee-brown hover:bg-coffee-bean hover:shadow-md active:shadow-none'
-                }`}
-                whileHover={!mutation.isPending && isValid ? { y: -1 } : {}}
-                whileTap={!mutation.isPending && isValid ? { scale: 0.98 } : {}}
-              >
-                {mutation.isPending ? 'Sending...' : 'Send Message'}
-              </motion.button>
-            </form>
-          </div>
+          </form>
         </motion.div>
       </div>
     </section>

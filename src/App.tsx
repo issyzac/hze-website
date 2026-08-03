@@ -2,10 +2,8 @@ import { useState, useEffect } from 'react';
 import Header from './components/Header'
 import HeroSection from './components/HeroSection'
 import ProductHighlights from './components/ProductHighlights'
-import WhoWeAre from './components/WhoWeAre'
 import OurStory from './components/OurStory'
 import OurValues from './components/OurValues'
-import ImpactSection from './components/Impact'
 import CustomerReviews from './components/CustomerReview'
 import SubscriptionWizard from './components/Subscription'
 import MobileSubscriptionFlow from './components/MobileSubscriptionFlow'
@@ -16,6 +14,10 @@ import { useIsMobile } from './hooks/useIsMobile'
 import ProblemStatement from './components/ProblemStatement';
 import ContactUs from './components/ContactUs'
 import EventsSection from './components/EventsSection'
+import CommunitySection from './components/CommunitySection'
+import Footer from './components/Footer'
+import Marquee from './components/Marquee'
+import WhatsAppFloat from './components/WhatsAppFloat'
 
 
 function App() {
@@ -43,24 +45,26 @@ function App() {
 
   return (
     <div className="min-h-screen bg-coffee-cream">
+      <a href="#main-content" className="skip-link">
+        Skip to content
+      </a>
       <Header />
 
       {/* Main content with proper spacing for fixed header */}
-      <main>
+      <main id="main-content">
         {/* Hero Section */}
         <HeroSection
           title={mockHeroData.title}
           subtitle={mockHeroData.subtitle}
-          ctaText="Subscribe Now"
+          ctaText={mockHeroData.ctaText}
           productImages={mockHeroData.productImages}
           onSubscribe={openSubscriptionModal}
         />
 
+        <Marquee />
+
         {/* Problem Statement Section */}
         <ProblemStatement />
-
-        {/* Who We Are Section */}
-        <WhoWeAre />
 
         {/* Our Story Section */}
         <OurStory />
@@ -71,18 +75,25 @@ function App() {
         {/* Products Section */}
         <ProductHighlights products={mockProducts} onOrderClick={openOrderModal} />
 
-        {/* About Section */}
-        <ImpactSection />
+        <div aria-hidden className="khanga-divider" />
 
-        {/* Reviews Section */}
-        <CustomerReviews />
+        {/* Community Section */}
+        <CommunitySection />
+
+        <div aria-hidden className="khanga-divider" />
 
         {/* Events Section */}
         <EventsSection />
 
         {/* Contact Section */}
         <ContactUs />
+
+        {/* Reviews Section — last word goes to the customers */}
+        <CustomerReviews />
       </main>
+
+      <Footer />
+      <WhatsAppFloat />
 
       {/* Subscription Modals */}
       {isMobile ? (
