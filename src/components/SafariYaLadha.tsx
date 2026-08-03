@@ -410,7 +410,7 @@ export default function SafariYaLadha() {
   const cardMsg = `Nimeshiriki kadi yangu ya ${p.name}! Niwekeni kwenye habari za events 🙌 — ${name.trim() || "___"}`;
 
   return (
-    <div id="safari" className="mb-14">
+    <div id="safari">
       <AnimatePresence mode="wait">
         {stage === "invite" && (
           <motion.div

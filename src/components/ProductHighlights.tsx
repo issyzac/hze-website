@@ -1,7 +1,6 @@
 import React from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import type { RoastedCoffeeBeanProduct } from "../types";
-import SafariYaLadha from "./SafariYaLadha";
 import { waLink } from "../lib/whatsapp";
 
 const easeSoft = [0.25, 1, 0.5, 1] as const;
@@ -27,10 +26,7 @@ const ProductHighlights: React.FC<{
   return (
     <section id="products" className="py-16 px-4 bg-white">
       <div className="max-w-7xl mx-auto">
-        {/* Safari ya Ladha — the discovery game */}
-        <SafariYaLadha />
-
-        {/* Browse header */}
+        {/* Header */}
         <motion.div
           className="mb-8 text-center"
           initial={reduceMotion ? undefined : { opacity: 0, y: 20 }}
@@ -39,13 +35,13 @@ const ProductHighlights: React.FC<{
           transition={{ duration: 0.7, ease: easeSoft }}
         >
           <h2
-            className="uppercase text-ink text-3xl sm:text-4xl leading-none"
+            className="uppercase text-ink text-4xl sm:text-5xl leading-none"
             style={{ fontFamily: "var(--font-condensed)", fontWeight: 700 }}
           >
-            …au chagua mwenyewe
+            Kahawa Zetu
           </h2>
           <p className="mt-2 font-display font-light italic text-bronze-deep text-lg sm:text-xl">
-            or browse the beans — roasted in Dar es Salaam
+            browse the beans — roasted in Dar es Salaam
           </p>
         </motion.div>
 

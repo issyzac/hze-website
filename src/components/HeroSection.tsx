@@ -85,7 +85,7 @@ export default function HeroSection({
               {...fadeUp(0.3)}
             >
               <button
-                onClick={() => scrollToSection("products")}
+                onClick={() => scrollToSection("safari")}
                 className="inline-flex items-center justify-center px-8 py-4 bg-enzi-db text-white font-sans font-medium text-base hover:bg-coffee-bean transition-colors min-h-[56px] rounded-full"
               >
                 {ctaText}

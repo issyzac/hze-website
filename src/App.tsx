@@ -17,6 +17,7 @@ import CommunitySection from './components/CommunitySection'
 import Footer from './components/Footer'
 import Marquee from './components/Marquee'
 import WhatsAppFloat from './components/WhatsAppFloat'
+import SafariYaLadha from './components/SafariYaLadha'
 
 
 function App() {
@@ -61,6 +62,13 @@ function App() {
         />
 
         <Marquee />
+
+        {/* Safari ya Ladha — first stop after landing */}
+        <section className="py-16 px-4 bg-white">
+          <div className="max-w-7xl mx-auto">
+            <SafariYaLadha />
+          </div>
+        </section>
 
         {/* Problem Statement Section */}
         <ProblemStatement />
