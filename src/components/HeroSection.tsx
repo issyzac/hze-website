@@ -44,7 +44,7 @@ export default function HeroSection({
         };
 
   return (
-    <section id="home" className="bg-white pt-40 sm:pt-48 lg:pt-52 pb-16 lg:pb-24">
+    <section id="home" className="bg-white pt-28 sm:pt-32 lg:pt-36 pb-16 lg:pb-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           {/* Left: message */}
