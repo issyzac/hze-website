@@ -180,11 +180,11 @@ export const mockSocialLinks: SocialLink[] = [
 
 // Mock hero section data
 export const mockHeroData = {
-  title: 'Find your perfect cup of coffee',
-  subtitle: 'At Harakati za Enzi, we help you discover coffee that fits your taste and your life.',
-  ctaText: 'Subscribe Now',
+  title: 'Taste Tanzania. Join the movement.',
+  subtitle: 'Specialty coffee roasted with precision, creating dignified work and places to belong.',
+  ctaText: 'Find my coffee',
   productImages: [
-    '/assets/images/hero_bg.png',
+    '/assets/images/community/community-is-our-favorite-blend.jpg',
   ]
 };
 
