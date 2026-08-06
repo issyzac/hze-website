@@ -18,6 +18,9 @@ import Footer from './components/Footer'
 import Marquee from './components/Marquee'
 import WhatsAppFloat from './components/WhatsAppFloat'
 import SafariYaLadha from './components/SafariYaLadha'
+import CareersCTA from './components/CareersCTA'
+import CareersPage from './components/CareersPage'
+import { useRoute } from './lib/router'
 
 
 function App() {
@@ -25,6 +28,7 @@ function App() {
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState<string>('');
   const isMobile = useIsMobile();
+  const route = useRoute();
 
   // Check URL params on mount to auto-open subscription dialog
   useEffect(() => {
@@ -42,6 +46,25 @@ function App() {
     setSelectedProductId(productId);
     setIsOrderModalOpen(true);
   };
+
+  // Land at the top whenever the route changes.
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [route]);
+
+  if (route === 'careers') {
+    return (
+      <div className="min-h-screen bg-white">
+        <a href="#main-content" className="skip-link">
+          Skip to content
+        </a>
+        <Header />
+        <CareersPage />
+        <Footer />
+        <WhatsAppFloat />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-coffee-cream">
@@ -94,6 +117,9 @@ function App() {
 
         {/* Contact + Reviews Section */}
         <ContactUs />
+
+        {/* Careers — join the barista team */}
+        <CareersCTA />
       </main>
 
       <Footer />

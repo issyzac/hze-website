@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { getRoute, navigate, scrollToAnchor } from "../lib/router";
 
 interface HeaderProps {
   instagramUrl?: string;
@@ -31,12 +32,11 @@ export default function Header({
   const handleNav = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
     const id = href.replace("#", "");
-    const el = document.getElementById(id);
-    if (el) {
-      const header = document.querySelector('header');
-      const headerHeight = header ? header.offsetHeight : 0;
-      const elementPosition = el.getBoundingClientRect().top + window.pageYOffset;
-      window.scrollTo({ top: elementPosition - headerHeight, behavior: 'smooth' });
+    // Off the home route these sections are not mounted — go home first.
+    if (getRoute() !== "home") {
+      navigate("home", id);
+    } else {
+      scrollToAnchor(id);
     }
     setOpen(false);
   };
