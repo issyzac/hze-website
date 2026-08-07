@@ -49,8 +49,8 @@ const BREW_OPTIONS: BrewMethod[] = ["Espresso", "Pour-Over", "French Press", "Co
 const GRIND_OPTIONS: GrindPref[] = ["Whole Bean", "Ground"];
 const SCHEDULE_OPTIONS: Schedule[] = ["Every 4 weeks"];
 const COFFEE_PRODUCTS = [
-  { name: "Tunu" as CoffeeProduct, price: "TSH 22,000 / 250g", flavorNotes: "Vanilla, rich, bold" },
-  { name: "Amka" as CoffeeProduct, price: "TSH 15,000 / 250g", flavorNotes: "Balanced, smooth, mild" }
+  { name: "Tunu" as CoffeeProduct, price: "TSH 25,000 / 250g", flavorNotes: "Stone fruit, chocolate, full-bodied" },
+  { name: "Amka" as CoffeeProduct, price: "TSH 18,000 / 250g", flavorNotes: "Apricot, citrus zest, caramel" }
 ];
 
 // Shared card base using SECONDARY with subtle border
@@ -98,8 +98,8 @@ function calculatePrice(cupsPerDay: number, _frequency: Schedule): string {
   const recommendedSizeGrams = availableSizes.find(size => size >= totalWithBuffer) || 
      Math.ceil(totalWithBuffer / 25000) * 25000;
   
-  // Price: TSH 22,000 per 250g
-  const pricePerGram = 22000 / 250; // TSH 88 per gram
+  // Price: TSH 25,000 per 250g
+  const pricePerGram = 25000 / 250; // TSH 100 per gram
   
   const totalPrice = recommendedSizeGrams * pricePerGram;
   

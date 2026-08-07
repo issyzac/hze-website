@@ -1,4 +1,5 @@
 import React from "react";
+import { getRoute, navigate, scrollToAnchor } from "../lib/router";
 
 interface FooterProps {
   instagramUrl?: string;
@@ -18,12 +19,11 @@ export default function Footer({
 }: FooterProps) {
   const handleNav = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
-    const el = document.getElementById(href.replace("#", ""));
-    if (el) {
-      const header = document.querySelector("header");
-      const headerHeight = header ? (header as HTMLElement).offsetHeight : 0;
-      const elementPosition = el.getBoundingClientRect().top + window.pageYOffset;
-      window.scrollTo({ top: elementPosition - headerHeight, behavior: "smooth" });
+    const id = href.replace("#", "");
+    if (getRoute() !== "home") {
+      navigate("home", id);
+    } else {
+      scrollToAnchor(id);
     }
   };
 
@@ -87,6 +87,18 @@ export default function Footer({
                   </a>
                 </li>
               ))}
+              <li>
+                <button
+                  type="button"
+                  onClick={() => navigate("careers")}
+                  className="font-['RoobertRegular'] text-coffee-cream/80 hover:text-coffee-gold transition-colors inline-flex items-center gap-2 py-1.5"
+                >
+                  Careers
+                  <span className="text-[10px] uppercase tracking-[0.14em] px-1.5 py-0.5 bg-coffee-gold text-coffee-dark">
+                    Hiring
+                  </span>
+                </button>
+              </li>
             </ul>
           </nav>
 

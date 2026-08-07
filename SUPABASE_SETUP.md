@@ -76,6 +76,50 @@ create policy "Enable insert for everyone" on public.orders for insert to anon w
 create policy "Enable read for everyone" on public.events for select to anon using (true);
 ```
 
+## 2b. Job Applications table (Careers page)
+
+The barista application on `#/careers` writes to `job_applications`. Run this once:
+
+```sql
+create table public.job_applications (
+  id uuid default gen_random_uuid() primary key,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  role text not null default 'Barista',
+  full_name text,
+  email text,
+  phone text,
+  area text,
+  preferred_location text,
+  experience_level text,
+  earliest_start text,
+  notice_period text,
+  salary_expectation text,
+  completion_percent integer,
+  answers jsonb not null,          -- { raw: {...}, readable: [{n, id, section, question, answer}] }
+  status text default 'new'        -- for your own shortlisting: new / shortlisted / interviewed / hired / declined
+);
+
+alter table public.job_applications enable row level security;
+
+-- Applicants may submit, but nobody anonymous may read applications back.
+create policy "Enable insert for everyone" on public.job_applications
+  for insert to anon with check (true);
+```
+
+Read applications in the Supabase dashboard (Table Editor), or with SQL:
+
+```sql
+select created_at, full_name, phone, email, preferred_location, experience_level, salary_expectation
+from public.job_applications
+order by created_at desc;
+```
+
+To read one full application:
+
+```sql
+select jsonb_pretty(answers -> 'readable') from public.job_applications where id = '<uuid>';
+```
+
 ## 3. Seed Initial Events (Optional)
 
 You can run this SQL to pre-fill your database with the current events:
