@@ -1,16 +1,13 @@
-/* Font Loading */
-@import url('https://fonts.googleapis.com/css2?family=Cookie&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Poiret+One&family=Ponomar&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Tangerine:wght@400;700&display=swap');
-
-
 @import "tailwindcss";
 
 @theme {
-  --color-coffee-dark: #2C1810;
-  --color-coffee-brown: #8B4513;
-  --color-coffee-light: #D2B48C;
-  --color-coffee-cream: #F5F5DC;
-  --color-coffee-bean: #6F4E37;
-  --color-coffee-gold: #DAA520;
+  /* Brand palette — Harakati za Enzi Brand Identity v1.0 */
+  --color-coffee-dark: #3A2415;
+  --color-coffee-brown: #B37542;   /* Enzi DB */
+  --color-coffee-light: #D19D71;   /* Enzi LB */
+  --color-coffee-cream: #EEEBE7;   /* Harakati Gray */
+  --color-coffee-bean: #9A6236;    /* deep Enzi tone */
+  --color-coffee-gold: #C18C5B;    /* Enzi MD */
 
   --color-hze-green: #ABB299;
   --color-hze-gray: #EEEBE7;
@@ -18,12 +15,17 @@
   --color-enzi-md: #C18C5B;
   --color-enzi-lb: #D19D71;
 
-  
-  --font-family-inter: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-family-ponomar: 'Ponomar', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-family-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  /* Playful-movement extension */
+  --color-bronze-deep: #7A4E1E;
+  --color-cream-aged: #EDE5CF;
+  --color-hze-teal: #2B7A6E;
+  --color-hze-red: #B83528;
+  --color-ink: #1C1408;
 
-  
+  --font-display: "GT Alpina", Georgia, serif;
+  --font-condensed: "GT Alpina Condensed", "Arial Narrow", sans-serif;
+  --font-sans: "Circular Std", system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
   --breakpoint-xs: 320px;
   --breakpoint-sm: 640px;
   --breakpoint-md: 768px;
@@ -32,9 +34,86 @@
   --breakpoint-2xl: 1440px;
 }
 
+/* Primary typeface: GT Alpina (display serif) */
+@font-face {
+  font-family: "GT Alpina";
+  src: url("/fonts/GT-Alpina-Standard-Light.ttf") format("truetype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "GT Alpina";
+  src: url("/fonts/GT-Alpina-Standard-Light-Italic.ttf") format("truetype");
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "GT Alpina";
+  src: url("/fonts/GT-Alpina-Standard-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "GT Alpina";
+  src: url("/fonts/GT-Alpina-Standard-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Display-condensed: GT Alpina Condensed (big uppercase headlines) */
+@font-face {
+  font-family: "GT Alpina Condensed";
+  src: url("/fonts/GT-Alpina-Condensed-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "GT Alpina Condensed";
+  src: url("/fonts/GT-Alpina-Condensed-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Secondary typeface: Circular Std (UI + body) */
+@font-face {
+  font-family: "Circular Std";
+  src: url("/fonts/CircularStd-Book.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Circular Std";
+  src: url("/fonts/CircularStd-Medium.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Circular Std";
+  src: url("/fonts/CircularStd-Bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Legacy family names still referenced in components — aliased to brand fonts
+   so every existing font-['...'] class renders the new brand type. */
 @font-face {
   font-family: "RoobertRegular";
-  src: url("/fonts/Roobert-Regular.otf") format("opentype");
+  src: url("/fonts/CircularStd-Book.otf") format("opentype");
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -42,7 +121,7 @@
 
 @font-face {
   font-family: "RoobertMedium";
-  src: url("/fonts/Roobert-Medium.otf") format("opentype");
+  src: url("/fonts/CircularStd-Medium.otf") format("opentype");
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -50,7 +129,7 @@
 
 @font-face {
   font-family: "RoobertBold";
-  src: url("/fonts/Roobert-Bold.otf") format("opentype");
+  src: url("/fonts/CircularStd-Bold.otf") format("opentype");
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -58,111 +137,152 @@
 
 @font-face {
   font-family: "GTAlpinaThin";
-  src: url("/fonts/GT-Alpina-Thin.otf") format("opentype");
+  src: url("/fonts/GT-Alpina-Standard-Light.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
   font-display: swap;
 }
- 
 
 /* Base typography configuration */
 @layer base {
   :root {
-    font-family: "RoobertRegular";
+    font-family: "Circular Std", system-ui, sans-serif;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   }
-  
+
   body {
-    font-family: "RoobertRegular", system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background-color: #F5F5DC;
-    color: #2C1810;
+    font-family: "Circular Std", system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background-color: #FFFFFF;
+    color: #3A2415;
     margin: 0;
     min-height: 100vh;
-    -webkit-tap-highlight-color: transparent;  
-    touch-action: manipulation; 
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
-  
+
   h1, h2, h3, h4, h5, h6 {
-    font-family: "GTAlpinaThin";
+    font-family: "GT Alpina", Georgia, serif;
+    font-weight: 300;
   }
-  
+
   /* Smooth scrolling for navigation */
   html {
     scroll-behavior: smooth;
   }
-  
-  /* Flat design coffee roastery styles */
-  .coffee-gradient {
-    background-color: #8B4513;
-  }
-  
-  /* Flat button design */
-  .coffee-btn {
-    background-color: #8B4513;
-    color: white;
-    padding: 0.75rem 1.5rem;
-    border: none;
-    font-weight: 600;
-    transition: background-color 0.2s ease;
-    cursor: pointer;
-    min-height: 48px; /* Ensure minimum touch target size */
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .coffee-btn:hover {
-    background-color: #6F4E37;
-  }
-  
-  .coffee-btn:active {
-    background-color: #5A3D2A;
-  }
-  
-  /* Flat card design */
-  .coffee-card {
-    background-color: white;
-    border: 2px solid #F5F5DC;
-    transition: border-color 0.2s ease;
-  }
-  
-  .coffee-card:hover {
-    border-color: #D2B48C;
-  }
-  
-  /* Flat design utility classes */
-  .flat-surface {
-    background-color: white;
-    border: 1px solid #E5E5E5;
-  }
-  
-  .flat-accent {
-    background-color: #DAA520;
-  }
-  
-  .flat-primary {
-    background-color: #8B4513;
-  }
-  
-  .flat-secondary {
-    background-color: #D2B48C;
-  }
-
 }
 
-/* Animation keyframes */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
+/* Brand pattern helpers */
+.pattern-cream {
+  background-image: url("/assets/patterns/pattern-3.png");
+  background-size: 420px auto;
+  background-repeat: repeat;
+}
+
+.pattern-tan {
+  background-image: url("/assets/patterns/pattern-1.png");
+  background-size: 420px auto;
+  background-repeat: repeat;
+}
+
+.pattern-beige {
+  background-image: url("/assets/patterns/pattern-2.png");
+  background-size: 420px auto;
+  background-repeat: repeat;
+}
+
+/* Khanga-inspired divider — repeating bronze + teal diamonds/triangles */
+.khanga-divider {
+  height: 18px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='18' viewBox='0 0 48 18'%3E%3Cpath d='M0 18 L12 4 L24 18 Z' fill='%23B37542'/%3E%3Cpath d='M24 18 L36 4 L48 18 Z' fill='%232B7A6E'/%3E%3Ccircle cx='12' cy='1.5' r='1.5' fill='%237A4E1E'/%3E%3Ccircle cx='36' cy='1.5' r='1.5' fill='%23B83528'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-size: 48px 18px;
+}
+
+/* Perforated daladala-ticket edge */
+.ticket-edge {
+  border-top: 2px dashed rgba(122, 78, 30, 0.4);
+  position: relative;
+}
+
+.ticket-edge::before,
+.ticket-edge::after {
+  content: "";
+  position: absolute;
+  top: -9px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: inherit;
+}
+
+/* Rubber-stamp effect */
+.stamp {
+  display: inline-block;
+  border: 3px solid currentColor;
+  border-radius: 6px;
+  padding: 0.15em 0.5em;
+  transform: rotate(-6deg);
+  opacity: 0.85;
+  font-family: "GT Alpina Condensed", sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='60'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.9 0.1'/%3E%3C/filter%3E%3Crect width='120' height='60' filter='url(%23n)'/%3E%3C/svg%3E");
+  mask-size: 120px 60px;
+}
+
+/* Button press-down */
+.btn-press {
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.btn-press:active {
+  transform: translateY(2px);
+}
+
+/* WhatsApp float pulse */
+@keyframes wa-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(43, 122, 110, 0.45); }
+  50% { box-shadow: 0 0 0 12px rgba(43, 122, 110, 0); }
+}
+
+/* Accessibility */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 1rem;
+  z-index: 100;
+  background-color: #3A2415;
+  color: #EEEBE7;
+  padding: 0.75rem 1.25rem;
+  font-family: "Circular Std", system-ui, sans-serif;
+  font-weight: 500;
+  transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
+:focus-visible {
+  outline: 3px solid #B37542;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 

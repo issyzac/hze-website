@@ -2,11 +2,8 @@ import { useState, useEffect } from 'react';
 import Header from './components/Header'
 import HeroSection from './components/HeroSection'
 import ProductHighlights from './components/ProductHighlights'
-import WhoWeAre from './components/WhoWeAre'
 import OurStory from './components/OurStory'
 import OurValues from './components/OurValues'
-import ImpactSection from './components/Impact'
-import CustomerReviews from './components/CustomerReview'
 import SubscriptionWizard from './components/Subscription'
 import MobileSubscriptionFlow from './components/MobileSubscriptionFlow'
 import OrderFlow from './components/OrderFlow'
@@ -16,6 +13,13 @@ import { useIsMobile } from './hooks/useIsMobile'
 import ProblemStatement from './components/ProblemStatement';
 import ContactUs from './components/ContactUs'
 import EventsSection from './components/EventsSection'
+import CommunitySection from './components/CommunitySection'
+import Footer from './components/Footer'
+import WhatsAppFloat from './components/WhatsAppFloat'
+import SafariYaLadha from './components/SafariYaLadha'
+import CareersCTA from './components/CareersCTA'
+import CareersPage from './components/CareersPage'
+import { useRoute } from './lib/router'
 
 
 function App() {
@@ -23,6 +27,7 @@ function App() {
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState<string>('');
   const isMobile = useIsMobile();
+  const route = useRoute();
 
   // Check URL params on mount to auto-open subscription dialog
   useEffect(() => {
@@ -41,26 +46,52 @@ function App() {
     setIsOrderModalOpen(true);
   };
 
+  // Land at the top whenever the route changes.
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [route]);
+
+  if (route === 'careers') {
+    return (
+      <div className="min-h-screen bg-white">
+        <a href="#main-content" className="skip-link">
+          Skip to content
+        </a>
+        <Header />
+        <CareersPage />
+        <Footer />
+        <WhatsAppFloat />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-coffee-cream">
+      <a href="#main-content" className="skip-link">
+        Skip to content
+      </a>
       <Header />
 
       {/* Main content with proper spacing for fixed header */}
-      <main>
+      <main id="main-content">
         {/* Hero Section */}
         <HeroSection
           title={mockHeroData.title}
           subtitle={mockHeroData.subtitle}
-          ctaText="Subscribe Now"
+          ctaText={mockHeroData.ctaText}
           productImages={mockHeroData.productImages}
           onSubscribe={openSubscriptionModal}
         />
 
+        {/* Safari ya Ladha — first stop after landing */}
+        <section className="py-16 px-4 bg-white">
+          <div className="max-w-7xl mx-auto">
+            <SafariYaLadha />
+          </div>
+        </section>
+
         {/* Problem Statement Section */}
         <ProblemStatement />
-
-        {/* Who We Are Section */}
-        <WhoWeAre />
 
         {/* Our Story Section */}
         <OurStory />
@@ -71,18 +102,25 @@ function App() {
         {/* Products Section */}
         <ProductHighlights products={mockProducts} onOrderClick={openOrderModal} />
 
-        {/* About Section */}
-        <ImpactSection />
+        <div aria-hidden className="khanga-divider" />
 
-        {/* Reviews Section */}
-        <CustomerReviews />
+        {/* Community Section */}
+        <CommunitySection />
+
+        <div aria-hidden className="khanga-divider" />
 
         {/* Events Section */}
         <EventsSection />
 
-        {/* Contact Section */}
+        {/* Contact + Reviews Section */}
         <ContactUs />
+
+        {/* Careers — join the barista team */}
+        <CareersCTA />
       </main>
+
+      <Footer />
+      <WhatsAppFloat />
 
       {/* Subscription Modals */}
       {isMobile ? (

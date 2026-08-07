@@ -1,8 +1,5 @@
- 
-
-import { useEffect, useState } from "react";
-import { motion, useReducedMotion, useScroll, useTransform, useMotionValue } from "framer-motion";
-import heroBg from "/assets/images/hero_bg.png";
+import { motion, useReducedMotion } from "framer-motion";
+import { waLink } from "../lib/whatsapp";
 
 interface HeroSectionProps {
   title?: string;
@@ -15,186 +12,142 @@ interface HeroSectionProps {
 
 const easeSoft = [0.25, 1, 0.5, 1] as const;
 
-const container = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.18,
-      delayChildren: 0.3,
-    },
-  },
+const scrollToSection = (id: string) => {
+  const el = document.getElementById(id);
+  if (el) {
+    const header = document.querySelector("header");
+    const headerHeight = header ? (header as HTMLElement).offsetHeight : 0;
+    const elementPosition = el.getBoundingClientRect().top + window.pageYOffset;
+    window.scrollTo({ top: elementPosition - headerHeight, behavior: "smooth" });
+  }
 };
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 24, filter: "blur(6px)" },
-  show: {
-    opacity: 1,
-    y: 0,
-    filter: "blur(0px)",
-    transition: { duration: 1.0, ease: easeSoft },
-  },
-};
-
-const bgReveal = {
-  hidden: { opacity: 0, scale: 1.04 },
-  show: {
-    opacity: 1,
-    scale: 1,
-    transition: { duration: 1.4, ease: easeSoft },
-  },
-};
-
-const overlayReveal = (targetOpacity: number) => ({
-  hidden: { opacity: 0 },
-  show: {
-    opacity: targetOpacity,
-    transition: { duration: 1.2, ease: easeSoft },
-  },
-});
 
 export default function HeroSection({
-  title = "Kahawa na Harakati",
-  subtitle,
-  ctaText = "Shop Now",
+  subtitle = "Specialty coffee roasted with precision, creating dignified work and places to belong.",
+  ctaText = "Find my coffee",
   productImages = [],
   backgroundImageUrl,
-  onSubscribe,
 }: HeroSectionProps) {
   const reduceMotion = useReducedMotion();
-  const bg = backgroundImageUrl || productImages[0] || heroBg;
+  const photo =
+    backgroundImageUrl ||
+    productImages[0] ||
+    "/assets/images/community/community-is-our-favorite-blend.jpg";
 
-  // Scroll direction detection
-  const [scrollDirection, setScrollDirection] = useState<'up' | 'down' | null>(null);
-  const { scrollY } = useScroll();
-  const y = useMotionValue(0);
-
-  useEffect(() => {
-    let lastScrollY = window.scrollY;
-
-    const updateScrollDirection = () => {
-      const scrollY = window.scrollY;
-      const direction = scrollY > lastScrollY ? 'down' : 'up';
-      if (direction !== scrollDirection) {
-        setScrollDirection(direction);
-      }
-      lastScrollY = scrollY > 0 ? scrollY : 0;
-      y.set(scrollY);
-    };
-
-    window.addEventListener('scroll', updateScrollDirection);
-    return () => window.removeEventListener('scroll', updateScrollDirection);
-  }, [scrollDirection, y]);
-
-  // Transform scroll position to animation values
-  const backgroundScale = useTransform(scrollY, [0, 1000], [1, 1.1]);
-  const overlayOpacity = useTransform(scrollY, [0, 500], [0.7, 0.9]);
-  const contentY = useTransform(scrollY, [0, 300], [0, scrollDirection === 'down' ? -50 : -25]);
-  const contentOpacity = useTransform(scrollY, [0, 200], [1, scrollDirection === 'down' ? 0.8 : 0.9]);
+  const fadeUp = (delay: number) =>
+    reduceMotion
+      ? {}
+      : {
+          initial: { opacity: 0, y: 20 },
+          animate: { opacity: 1, y: 0 },
+          transition: { duration: 0.8, ease: easeSoft, delay },
+        };
 
   return (
-    <motion.section
-      id="home"
-      className="relative pt-30 sm:pt-48 mt-12 pb-16 bg-white"
-      initial={reduceMotion ? undefined : { opacity: 0 }}
-      animate={reduceMotion ? undefined : { opacity: 1 }}
-      transition={{ duration: 1.0, ease: easeSoft }}
-    >
+    <section id="home" className="bg-white pt-28 sm:pt-32 lg:pt-36 pb-16 lg:pb-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          className="relative overflow-hidden shadow-sm border border-coffee-brown/15 scale-[1.10]"
-          style={{
-            backgroundImage: `url(${bg})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            minHeight: "62vh",
-            scale: backgroundScale,
-          }}
-          variants={bgReveal}
-          initial="hidden"
-          animate="show"
-        >
-          <motion.div
-            className="absolute inset-0 bg-coffee-brown/70"
-            variants={overlayReveal(0.7)}
-            style={{ opacity: overlayOpacity }}
-          />
-
-          <motion.div
-            className="relative z-10 flex flex-col items-center text-center justify-center min-h-[62vh] p-6 sm:p-10"
-            variants={container}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, amount: 0.3 }}
-            style={{ y: contentY, opacity: contentOpacity }}
-          >
-            <motion.h1
-              className="text-white font-['GTAlpinaThin'] leading-tight drop-shadow-sm text-3xl sm:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl"
-              variants={fadeUp}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+          {/* Left: message */}
+          <div className="lg:col-span-7">
+            <motion.p
+              className="font-sans text-sm tracking-[0.2em] uppercase text-enzi-db mb-6"
+              {...fadeUp(0)}
             >
-              {title}
+              Tanzanian specialty coffee — Dar es Salaam
+            </motion.p>
+
+            <motion.h1
+              className="text-ink leading-[0.95] text-6xl sm:text-7xl lg:text-8xl mb-4 uppercase"
+              style={{ fontFamily: "var(--font-condensed)", fontWeight: 700 }}
+              {...fadeUp(0.1)}
+            >
+              Karibu kwenye
+              <br />
+              <span style={{ color: "#b37542a3" }}>Harakati</span>
             </motion.h1>
 
-            {subtitle && (
-              <motion.p
-                className="mt-4 max-w-2xl text-white/90 text-base sm:text-lg lg:text-xl font-['RoobertRegular']"
-                variants={fadeUp}
-              >
-                {subtitle}
-              </motion.p>
-            )}
+            <motion.p
+              className="font-display font-light italic text-coffee-dark/80 text-2xl sm:text-3xl mb-6"
+              {...fadeUp(0.15)}
+            >
+              Taste Tanzania. Join the movement.
+            </motion.p>
+
+            <motion.p
+              className="font-sans text-lg sm:text-xl text-coffee-dark/70 leading-relaxed max-w-xl mb-10"
+              {...fadeUp(0.2)}
+            >
+              {subtitle}
+            </motion.p>
 
             <motion.div
-              className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-center gap-4"
-              variants={fadeUp}
+              className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6"
+              {...fadeUp(0.3)}
             >
-              <motion.button
-                onClick={onSubscribe}
-                className="inline-flex items-center justify-center px-6 py-4 sm:px-8 sm:py-4 text-base sm:text-lg font-['RoobertRegular'] text-white bg-coffee-gold hover:bg-coffee-gold/90 shadow-sm transition-colors min-h-[56px] w-full sm:w-auto"
-                whileHover={reduceMotion ? undefined : { y: -3 }}
-                whileTap={reduceMotion ? undefined : { scale: 0.97 }}
-                transition={{ duration: 0.25, ease: "easeOut" }}
+              <button
+                onClick={() => scrollToSection("safari")}
+                className="inline-flex items-center justify-center px-8 py-4 bg-enzi-db text-white font-sans font-medium text-base hover:bg-coffee-bean transition-colors min-h-[56px] rounded-full"
               >
                 {ctaText}
-              </motion.button>
-
-              <motion.button
-                onClick={() => {
-                  const el = document.getElementById("products");
-                  if (el) {
-                    const header = document.querySelector("header");
-                    const headerHeight = header ? (header as HTMLElement).offsetHeight : 0;
-                    const elementPosition = el.getBoundingClientRect().top + window.pageYOffset;
-                    window.scrollTo({ top: elementPosition - headerHeight, behavior: "smooth" });
-                  }
-                }}
-                className="inline-flex items-center justify-center px-6 py-4 sm:px-8 sm:py-4 text-base sm:text-lg font-['RoobertRegular'] border-2 border-white/80 text-white hover:bg-white/10 transition-colors min-h-[56px] w-full sm:w-auto"
-                whileHover={reduceMotion ? undefined : { y: -3 }}
-                whileTap={reduceMotion ? undefined : { scale: 0.97 }}
-                transition={{ duration: 0.25, ease: "easeOut" }}
+              </button>
+              <button
+                onClick={() => scrollToSection("contact")}
+                className="inline-flex items-center justify-center gap-2 font-sans font-medium text-base text-coffee-dark hover:text-enzi-db transition-colors min-h-[56px] px-2 group"
               >
-                Discover Your Flavor
-              </motion.button>
+                Visit the café
+                <span
+                  aria-hidden
+                  className="inline-block transition-transform group-hover:translate-x-1"
+                >
+                  →
+                </span>
+              </button>
             </motion.div>
-          </motion.div>
-        </motion.div>
 
-        <div className="mt-8 flex justify-center">
+            <motion.a
+              href={waLink("Nataka kujiunga na coffee subscription. Nielezeni zaidi.")}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-block mt-8 font-sans text-sm text-coffee-dark/50 hover:text-enzi-db underline underline-offset-4 transition-colors min-h-[44px]"
+              {...fadeUp(0.4)}
+            >
+              Or build a coffee ritual — subscribe on WhatsApp
+            </motion.a>
+          </div>
+
+          {/* Right: photo with pattern accent */}
           <motion.div
-            className="w-7 h-12 border-2 border-coffee-brown/60 flex justify-center items-start"
-            initial={reduceMotion ? undefined : { opacity: 0, y: 8 }}
-            whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1.0, ease: easeSoft }}
+            className="lg:col-span-5 relative"
+            {...(reduceMotion
+              ? {}
+              : {
+                  initial: { opacity: 0 },
+                  animate: { opacity: 1 },
+                  transition: { duration: 1.0, ease: easeSoft, delay: 0.2 },
+                })}
           >
-            <motion.div
-              className="w-1.5 h-3 mt-2 bg-coffee-brown/80"
-              animate={reduceMotion ? undefined : { y: [0, 10, 0] }}
-              transition={reduceMotion ? undefined : { duration: 2.0, repeat: Infinity, ease: "easeInOut" }}
+            <div
+              aria-hidden
+              className="absolute -top-6 -right-6 sm:-top-8 sm:-right-8 w-2/3 h-2/3 pattern-beige"
             />
+            <div className="relative overflow-hidden aspect-[4/5]">
+              <motion.img
+                src={photo}
+                alt="Friends sharing coffee and conversation at the Harakati za Enzi café"
+                className="w-full h-full object-cover"
+                fetchPriority="high"
+                {...(reduceMotion
+                  ? {}
+                  : {
+                      initial: { scale: 1.12, clipPath: "inset(100% 0 0 0)" },
+                      animate: { scale: 1, clipPath: "inset(0% 0 0 0)" },
+                      transition: { duration: 1.1, ease: easeSoft, delay: 0.25 },
+                    })}
+              />
+            </div>
           </motion.div>
         </div>
       </div>
-    </motion.section>
+    </section>
   );
 }

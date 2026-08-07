@@ -41,8 +41,8 @@ const CUP_OPTIONS: CupsRange[] = ["1 cup a day", "A cup every other day", "Two o
 const BREW_OPTIONS: BrewMethod[] = ["Espresso", "Pour-Over", "French Press", "Cold Brew"];
 const GRIND_OPTIONS: GrindPref[] = ["Whole Bean", "Ground"];
 const COFFEE_OPTIONS = [
-  { name: "Tunu", description: "Dark roast with vanilla", price: "TSH 22,000" },
-  { name: "Amka", description: "Decaf blend", price: "TSH 15,000" }
+  { name: "Tunu", description: "Full-bodied dark roast, stone fruit & chocolate", price: "TSH 25,000" },
+  { name: "Amka", description: "Bright medium roast, apricot & citrus", price: "TSH 18,000" }
 ] as const;
 const SCHEDULE_OPTIONS: Schedule[] = ["Every 4 weeks"];
 
@@ -55,10 +55,10 @@ const brewToGrindMap: Record<BrewMethod, string> = {
 
 function getCoffeePrice(coffeeProduct: string): number {
   switch (coffeeProduct) {
-    case "Nguvu": return 18000;
-    case "Tunu": return 22000;
-    case "Amka": return 15000;
-    default: return 22000;  
+    case "Nguvu": return 20000;
+    case "Tunu": return 25000;
+    case "Amka": return 18000;
+    default: return 25000;
   }
 }
 
