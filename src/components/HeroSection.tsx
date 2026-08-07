@@ -61,7 +61,7 @@ export default function HeroSection({
               style={{ fontFamily: "var(--font-condensed)", fontWeight: 700 }}
               {...fadeUp(0.1)}
             >
-              Karibu kwenye
+              <span style={{ color: "#1c1408b8" }}>Karibu kwenye</span>
               <br />
               <span style={{ color: "#b37542a3" }}>Harakati</span>
             </motion.h1>
