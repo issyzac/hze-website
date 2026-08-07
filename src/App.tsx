@@ -15,7 +15,6 @@ import ContactUs from './components/ContactUs'
 import EventsSection from './components/EventsSection'
 import CommunitySection from './components/CommunitySection'
 import Footer from './components/Footer'
-import Marquee from './components/Marquee'
 import WhatsAppFloat from './components/WhatsAppFloat'
 import SafariYaLadha from './components/SafariYaLadha'
 import CareersCTA from './components/CareersCTA'
@@ -83,8 +82,6 @@ function App() {
           productImages={mockHeroData.productImages}
           onSubscribe={openSubscriptionModal}
         />
-
-        <Marquee />
 
         {/* Safari ya Ladha — first stop after landing */}
         <section className="py-16 px-4 bg-white">

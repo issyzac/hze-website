@@ -63,7 +63,7 @@ export default function HeroSection({
             >
               Karibu kwenye
               <br />
-              <span className="text-enzi-db">Harakati</span>
+              <span style={{ color: "#b37542a3" }}>Harakati</span>
             </motion.h1>
 
             <motion.p

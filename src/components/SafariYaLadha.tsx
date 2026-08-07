@@ -25,9 +25,9 @@ export const PERSONALITIES: Record<PersonalityKey, Personality> = {
     english: "The Mover",
     tagline: "Nguvu ya harakati iko ndani yako",
     notes: ["Bold", "Dark chocolate", "French Press"],
-    productName: "TUNU dark roast",
+    productName: "TUNU medium roast",
     brew: "French Press",
-    price: "TZS 22,000",
+    price: "TZS 25,000",
     color: "#B83528",
   },
   mpole: {
@@ -38,7 +38,7 @@ export const PERSONALITIES: Record<PersonalityKey, Personality> = {
     notes: ["Smooth", "Caramel & toffee", "Cappuccino"],
     productName: "NGUVU medium roast",
     brew: "Cappuccino at home",
-    price: "TZS 18,000",
+    price: "TZS 20,000",
     color: "#B37542",
   },
   msafiri: {
@@ -49,7 +49,7 @@ export const PERSONALITIES: Record<PersonalityKey, Personality> = {
     notes: ["Bright", "Blueberry", "V60 pour-over"],
     productName: "TUNU",
     brew: "V60 pour-over — taste the blueberry",
-    price: "TZS 22,000",
+    price: "TZS 25,000",
     color: "#2B7A6E",
   },
   amka: {
@@ -57,10 +57,10 @@ export const PERSONALITIES: Record<PersonalityKey, Personality> = {
     name: "Stress Repeller",
     english: "The Warm Riser",
     tagline: "Amka, pumzika, furahia",
-    notes: ["Easy-going", "Hazelnut & vanilla", "Any time"],
-    productName: "AMKA decaf",
+    notes: ["Bright", "Apricot & citrus", "Any time"],
+    productName: "AMKA",
     brew: "Any time of day",
-    price: "TZS 15,000",
+    price: "TZS 18,000",
     color: "#D19D71",
   },
 };
@@ -109,7 +109,7 @@ const QUESTIONS: Question[] = [
       { label: "Caramel & toffee — sweet comfort", emoji: "🍮", points: { mpole: 2 } },
       { label: "Blueberry & blackcurrant — bright surprise", emoji: "🫐", points: { msafiri: 2 } },
       { label: "Dark chocolate — deep and serious", emoji: "🍫", points: { mwanaharakati: 2 } },
-      { label: "Hazelnut & vanilla — smooth operator", emoji: "🌰", points: { amka: 2 } },
+      { label: "Apricot & citrus zest — bright starter", emoji: "🍑", points: { amka: 2 } },
     ],
   },
   {
