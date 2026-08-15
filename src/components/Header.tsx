@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getRoute, navigate, scrollToAnchor } from "../lib/router";
+import { getRoute, navigate, scrollToAnchor, useRoute, type Route } from "../lib/router";
 
 interface HeaderProps {
   instagramUrl?: string;
@@ -14,6 +14,7 @@ export default function Header({
 }: HeaderProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const route = useRoute();
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 40);
@@ -21,16 +22,27 @@ export default function Header({
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const nav = [
+  // `route` entries are their own page; the rest are sections of home.
+  const nav: { name: string; href: string; route?: Route }[] = [
     { name: "Home", href: "#home" },
     { name: "Shop", href: "#products" },
+    { name: "Ritual", href: "#/rituals", route: "rituals" },
     { name: "Stories", href: "#our-story" },
     { name: "Events", href: "#events" },
     { name: "Visit Us", href: "#contact" },
   ];
 
-  const handleNav = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+  const handleNav = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string,
+    route?: Route,
+  ) => {
     e.preventDefault();
+    setOpen(false);
+    if (route) {
+      navigate(route);
+      return;
+    }
     const id = href.replace("#", "");
     // Off the home route these sections are not mounted — go home first.
     if (getRoute() !== "home") {
@@ -38,7 +50,6 @@ export default function Header({
     } else {
       scrollToAnchor(id);
     }
-    setOpen(false);
   };
 
   return (
@@ -64,8 +75,12 @@ export default function Header({
               <a
                 key={item.name}
                 href={item.href}
-                onClick={(e) => handleNav(e, item.href)}
-                className="text-enzi-db font-sans tracking-tight hover:text-coffee-gold transition-colors py-2"
+                onClick={(e) => handleNav(e, item.href, item.route)}
+                className={`font-sans tracking-tight transition-colors py-2 ${
+                  item.route && route === item.route
+                    ? "text-hze-red font-medium border-b-2 border-hze-red"
+                    : "text-enzi-db hover:text-coffee-gold"
+                }`}
               >
                 {item.name}
               </a>
@@ -131,8 +146,12 @@ export default function Header({
             <a
               key={item.name}
               href={item.href}
-              onClick={(e) => handleNav(e, item.href)}
-              className="px-6 py-4 text-enzi-db/90 hover:text-coffee-gold hover:bg-coffee-brown/5 font-sans min-h-[48px] flex items-center"
+              onClick={(e) => handleNav(e, item.href, item.route)}
+              className={`px-6 py-4 hover:bg-coffee-brown/5 font-sans min-h-[48px] flex items-center ${
+                item.route && route === item.route
+                  ? "text-hze-red font-medium"
+                  : "text-enzi-db/90 hover:text-coffee-gold"
+              }`}
             >
               {item.name}
             </a>

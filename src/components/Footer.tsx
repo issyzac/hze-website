@@ -1,13 +1,14 @@
 import React from "react";
-import { getRoute, navigate, scrollToAnchor } from "../lib/router";
+import { getRoute, navigate, scrollToAnchor, type Route } from "../lib/router";
 
 interface FooterProps {
   instagramUrl?: string;
   xUrl?: string;
 }
 
-const footerNav = [
+const footerNav: { name: string; href: string; route?: Route }[] = [
   { name: "Shop", href: "#products" },
+  { name: "The ritual", href: "#/rituals", route: "rituals" },
   { name: "Stories", href: "#our-story" },
   { name: "Events", href: "#events" },
   { name: "Visit Us", href: "#contact" },
@@ -17,8 +18,16 @@ export default function Footer({
   instagramUrl = "https://www.instagram.com/harakatizaenzi",
   xUrl = "https://x.com/harakatizaenzi",
 }: FooterProps) {
-  const handleNav = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+  const handleNav = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string,
+    route?: Route,
+  ) => {
     e.preventDefault();
+    if (route) {
+      navigate(route);
+      return;
+    }
     const id = href.replace("#", "");
     if (getRoute() !== "home") {
       navigate("home", id);
@@ -80,7 +89,7 @@ export default function Footer({
                 <li key={item.name}>
                   <a
                     href={item.href}
-                    onClick={(e) => handleNav(e, item.href)}
+                    onClick={(e) => handleNav(e, item.href, item.route)}
                     className="font-['RoobertRegular'] text-coffee-cream/80 hover:text-coffee-gold transition-colors inline-block py-1.5"
                   >
                     {item.name}
