@@ -111,11 +111,11 @@ function App() {
         {/* Our Story Section */}
         <OurStory />
 
-        {/* Our Values Section */}
-        <OurValues />
-
         {/* Products Section */}
         <ProductHighlights products={mockProducts} onOrderClick={openOrderModal} />
+
+        {/* Our Values Section */}
+        <OurValues />
 
         <div aria-hidden className="khanga-divider" />
 

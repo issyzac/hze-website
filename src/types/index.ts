@@ -5,7 +5,7 @@ export interface RoastedCoffeeBeanProduct {
   description: string;
   image: string;
   price: string;
-  category: 'Nguvu' | 'Tunu' | 'Amka';
+  category: 'Nguvu' | 'Tunu' | 'Amka' | 'Mirumbani';
   roastLevel: 'light' | 'medium' | 'dark';
   origin: string;
   flavorNotes: string[];
@@ -16,6 +16,10 @@ export interface RoastedCoffeeBeanProduct {
   roastDate?: string;
   certifications?: string[]; // e.g., ["organic", "fair-trade"]
   backgroundColor: string;
+  /** Seasonal lots are shown with a limited-release badge and a stock line. */
+  seasonal?: boolean;
+  /** Human-readable size of the release, e.g. "250kg — one harvest". */
+  releaseSize?: string;
 }
 
 // Bundle item interface

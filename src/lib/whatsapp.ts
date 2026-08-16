@@ -7,3 +7,10 @@ export const waLink = (text: string) =>
 export const openWhatsApp = (text: string) => {
   window.open(waLink(text), "_blank", "noopener,noreferrer");
 };
+
+/**
+ * Share sheet link — no recipient, so WhatsApp asks the sender who to send to.
+ * Distinct from `waLink`, which always opens a chat with the HZE bot.
+ */
+export const waShareLink = (text: string) =>
+  `https://wa.me/?text=${encodeURIComponent(text)}`;
