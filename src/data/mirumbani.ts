@@ -41,7 +41,7 @@ export type MirumbaniPhoto = {
 export const MIRUMBANI_PORTRAIT: MirumbaniPhoto = {
   src: "/assets/images/mirumbani/family-cherries.jpg",
   alt: "Zitto crouching among the coffee with his daughters Josina and Alaa, looking closely at green cherries on a young tree",
-  caption: "Zitto with Josina and Alaa, reading the cherries — Kigoma.",
+  caption: "Zitto with Josina and Alaa, looking at the cherries in Kigoma.",
   orientation: "landscape",
 };
 
