@@ -103,8 +103,17 @@ alter table public.job_applications enable row level security;
 
 -- Applicants may submit, but nobody anonymous may read applications back.
 create policy "Enable insert for everyone" on public.job_applications
-  for insert to anon with check (true);
+  for insert to anon, authenticated with check (true);
 ```
+
+> **Do not chain `.select()` onto this insert.** Because there is deliberately no
+> SELECT policy, `.insert(...).select()` makes PostgREST run an
+> `INSERT ... RETURNING`, whose read-back RLS check fails and rolls the whole
+> statement back. Postgres reports it as
+> `new row violates row-level security policy for table "job_applications"`,
+> which reads like the *insert* was refused when only the *return* was — a
+> genuinely misleading error. `src/hooks/useJobApplication.ts` inserts without
+> `.select()` for this reason. The same applies to any other insert-only table.
 
 Read applications in the Supabase dashboard (Table Editor), or with SQL:
 

@@ -36,13 +36,18 @@ export const useJobApplication = () => {
                 },
             };
 
-            const { data, error } = await supabase
+            // No .select() here. Chaining it makes PostgREST issue an
+            // INSERT ... RETURNING, which needs a SELECT policy — and this table
+            // deliberately has none (applicants may submit, nobody anonymous may
+            // read applications back). With RLS on, that read-back is refused and
+            // Postgres reports it as "new row violates row-level security policy",
+            // which looks like the insert failed when in fact only the return did.
+            const { error } = await supabase
                 .from('job_applications')
-                .insert([dbData])
-                .select();
+                .insert([dbData]);
 
             if (error) throw error;
-            return data;
+            return true;
         },
     });
 
