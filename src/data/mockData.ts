@@ -14,7 +14,7 @@ export const mockProducts: RoastedCoffeeBeanProduct[] = [
     description:
       'Seasonal Kigoma lot from the Josina and Alaa estates — red berry brightness, sweet orange, and a brown-sugar finish',
     image: '/assets/images/mirumbani/mrumba-tree.png',
-    price: '18,000',
+    price: '22,000',
     category: 'Mirumbani',
     roastLevel: 'medium',
     origin: 'Kigoma, Tanzania',

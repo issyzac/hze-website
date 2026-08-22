@@ -287,7 +287,7 @@ const KigomaLabel: React.FC<{
           }}
         >
           <SpecRow label="Ladha" value={notes} />
-          <SpecRow label="Mchakato" value="Washed · raised beds" />
+          <SpecRow label="Mchakato" value="Washed · African beds" />
           <SpecRow label="Mashamba" value={"Josina & Alaa · 1,200–1,300\u00A0m"} />
         </div>
 

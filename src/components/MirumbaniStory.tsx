@@ -18,9 +18,14 @@ const easeSoft = [0.25, 1, 0.5, 1] as const;
 
 /* ---------------------------------------------------------------- share --- */
 
-/** Canonical link to this coffee, with the panel already open. */
-const shareUrl = () =>
-  `${window.location.origin}${window.location.pathname}#mirumbani`;
+/**
+ * Share target for this coffee.
+ *
+ * Points at /mirumbani.html rather than /#mirumbani: crawlers never see the hash,
+ * so a shared link would otherwise preview the site-wide card. That page holds
+ * Mirumbani's own Open Graph tags and forwards readers to the panel.
+ */
+const shareUrl = () => `${window.location.origin}/mirumbani.html`;
 
 const SHARE_TEXT =
   "Mirumbani — kahawa ya kurudi nyumbani. A seasonal Kigoma lot from Harakati za Enzi, and the song it is named for.";
