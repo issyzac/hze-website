@@ -3,28 +3,70 @@ import { waLink } from "../lib/whatsapp";
 
 const easeSoft = [0.25, 1, 0.5, 1] as const;
 
+type HZEEvent = {
+  title: string;
+  variant?: string;
+  dateISO: string;
+  category: string;
+  venue: string;
+  blurb: string;
+};
+
 // EDIT EVENTS HERE
-const EVENTS = [
+const EVENTS: HZEEvent[] = [
   {
-    title: "Book Swap",
-    dateISO: "2026-09-05",
-    category: "book-swap",
+    title: "Brew Better at Home",
+    variant: "Bring Your Gadgets Edition",
+    dateISO: "2026-08-29",
+    category: "brew-class",
     venue: "HZE Mbezi",
-    blurb: "Bring a book, take a book. Literary exchange over good coffee.",
+    blurb: "Bring your own kit — grinder, dripper, press — and we'll dial it in together.",
   },
   {
     title: "Brew Better at Home",
+    variant: "Class",
     dateISO: "2026-09-19",
     category: "brew-class",
     venue: "HZE Mbezi",
     blurb: "Pour-over, French press, and fixing your home brew — hands on.",
   },
   {
-    title: "Worship Experience",
-    dateISO: "2026-09-25",
-    category: "worship",
+    title: "Book Swap",
+    dateISO: "2026-09-26",
+    category: "book-swap",
     venue: "HZE Mbezi",
-    blurb: "An evening of worship, community, and kahawa.",
+    blurb: "Bring a book, take a book. Literary exchange over good coffee.",
+  },
+  {
+    title: "Brew Better at Home",
+    variant: "Cupping",
+    dateISO: "2026-10-14",
+    category: "brew-class",
+    venue: "HZE Mbezi",
+    blurb: "Taste side by side and learn how a coffee gets scored — slurp included.",
+  },
+  {
+    title: "Brew Better at Home",
+    variant: "Bring Your Gadgets Edition",
+    dateISO: "2026-11-20",
+    category: "brew-class",
+    venue: "HZE Mbezi",
+    blurb: "Bring your own kit — grinder, dripper, press — and we'll dial it in together.",
+  },
+  {
+    title: "Brew Better at Home",
+    variant: "Class",
+    dateISO: "2026-12-12",
+    category: "brew-class",
+    venue: "HZE Mbezi",
+    blurb: "Pour-over, French press, and fixing your home brew — hands on.",
+  },
+  {
+    title: "HZE Christmas Carols Party",
+    dateISO: "2026-12-19",
+    category: "carols",
+    venue: "HZE Mbezi",
+    blurb: "Carols, kahawa, and the whole HZE community closing out the year together.",
   },
 ];
 
@@ -37,6 +79,7 @@ const CATEGORIES: Record<
   "book-swap": { label: "Book Swap", emoji: "📚", color: "#2B7A6E", text: "#FFFFFF" },
   "brew-class": { label: "Brew Class", emoji: "☕", color: "#B37542", text: "#FFFFFF" },
   "games-night": { label: "Games Night", emoji: "🎲", color: "#D19D71", text: "#1C1408" },
+  carols: { label: "Carols Party", emoji: "🎄", color: "#B83528", text: "#FFFFFF" },
 };
 
 const RHYTHMS = [
@@ -50,6 +93,13 @@ const RHYTHMS = [
 const SWAHILI_MONTHS = [
   "Januari", "Februari", "Machi", "Aprili", "Mei", "Juni",
   "Julai", "Agosti", "Septemba", "Oktoba", "Novemba", "Desemba",
+];
+
+// Not a slice(0, 3) of the above — "Agosti" would abbreviate to "AGO", which
+// reads as English "ago" on a card about an upcoming event.
+const MONTH_ABBR = [
+  "Jan", "Feb", "Mac", "Apr", "Mei", "Jun",
+  "Jul", "Aug", "Sep", "Okt", "Nov", "Des",
 ];
 
 const daysUntil = (dateISO: string) => {
@@ -88,8 +138,7 @@ const EventsSection = () => {
   const upcoming = EVENTS
     .map((e) => ({ ...e, days: daysUntil(e.dateISO) }))
     .filter((e) => e.days >= 0)
-    .sort((a, b) => a.days - b.days)
-    .slice(0, 3);
+    .sort((a, b) => a.days - b.days);
 
   return (
     <section className="py-16 sm:py-24 bg-cream-aged relative" id="events">
@@ -136,7 +185,7 @@ const EventsSection = () => {
                         {d.getDate()}
                       </span>
                       <span className="font-sans text-xs uppercase tracking-widest mt-1">
-                        {SWAHILI_MONTHS[d.getMonth()].slice(0, 3)}
+                        {MONTH_ABBR[d.getMonth()]}
                       </span>
                     </div>
                     <div className="p-4 flex-1">
@@ -147,6 +196,11 @@ const EventsSection = () => {
                       >
                         {event.title}
                       </h3>
+                      {event.variant && (
+                        <p className="font-display font-light italic text-bronze-deep text-sm leading-tight mt-0.5">
+                          {event.variant}
+                        </p>
+                      )}
                       <p className="font-sans text-xs text-ink/50 mt-1">
                         {event.venue} · <span className="text-hze-red font-medium">{countdownLabel(event.days)}</span>
                       </p>
@@ -155,7 +209,7 @@ const EventsSection = () => {
                   <p className="px-4 pb-4 font-sans text-sm text-ink/70">{event.blurb}</p>
                   <div className="ticket-edge bg-cream-aged/60 mt-auto p-4 text-center">
                     <a
-                      href={waLink(`Nataka kujisajili: ${event.title} — ${formatDate(event.dateISO)}. Jina langu ni ___`)}
+                      href={waLink(`Nataka kujisajili: ${event.title}${event.variant ? ` (${event.variant})` : ""} — ${formatDate(event.dateISO)}. Jina langu ni ___`)}
                       target="_blank"
                       rel="noreferrer"
                       className="btn-press inline-flex items-center justify-center w-full px-5 py-3 bg-hze-teal text-white font-sans font-medium text-sm rounded-full hover:bg-[#236458] transition-colors min-h-[48px]"
