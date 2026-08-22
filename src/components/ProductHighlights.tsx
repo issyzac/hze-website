@@ -4,6 +4,7 @@ import type { RoastedCoffeeBeanProduct } from "../types";
 import { waLink } from "../lib/whatsapp";
 import CoffeeBag, { type BagPalette } from "./CoffeeBag";
 import MirumbaniStory from "./MirumbaniStory";
+import KilimanjaroStory from "./KilimanjaroStory";
 
 const easeSoft = [0.25, 1, 0.5, 1] as const;
 
@@ -19,6 +20,8 @@ type BeanStyle = {
   panelBg: string;
   /** Gusset colours + printed region for the drawn bag. */
   bag: BagPalette;
+  /** Shown under the buy line on seasonal lots. */
+  seasonalNote?: string;
 };
 
 const BEAN_STYLES: Record<string, BeanStyle> = {
@@ -36,6 +39,8 @@ const BEAN_STYLES: Record<string, BeanStyle> = {
       region: "KILIMANJARO",
       accent: "#2B7A6E",
     },
+    seasonalNote:
+      "One harvest from the southern slopes of Kilimanjaro. When the season turns, so does the cup.",
   },
   Tunu: {
     accent: "#B37542",
@@ -82,6 +87,8 @@ const BEAN_STYLES: Record<string, BeanStyle> = {
       accent: "#2E4B34",
       labelStyle: "kigoma",
     },
+    seasonalNote:
+      "Msimu huu tumevuna 250kg tu — one harvest, then we wait for the hills.",
   },
 };
 
@@ -207,8 +214,22 @@ const BeanPanelBody: React.FC<{
   onClose: () => void;
   reduceMotion: boolean | null;
 }> = ({ product, onClose, reduceMotion }) => {
-  const { accent, mood, eyebrow, imageSide } = styleFor(product.name);
+  const { accent, mood, eyebrow, imageSide, seasonalNote } = styleFor(product.name);
   const imageFirst = imageSide === "left";
+
+  // Beans with a field story render it under the buy panel.
+  const story =
+    product.name === "Mirumbani"
+      ? {
+          anchor: "mirumbani-story-title",
+          node: <MirumbaniStory reduceMotion={reduceMotion} />,
+        }
+      : product.name === "Nguvu"
+        ? {
+            anchor: "kilimanjaro-story-title",
+            node: <KilimanjaroStory reduceMotion={reduceMotion} />,
+          }
+        : null;
 
   return (
     <>
@@ -294,13 +315,9 @@ const BeanPanelBody: React.FC<{
             </span>
           </div>
 
-          {product.seasonal && product.releaseSize && (
-            <p
-              className="mt-5 font-sans text-sm"
-              style={{ color: accent }}
-            >
-              Msimu huu tumevuna {product.releaseSize} tu — one harvest, then we
-              wait for the hills.
+          {product.seasonal && seasonalNote && (
+            <p className="mt-5 font-sans text-sm" style={{ color: accent }}>
+              {seasonalNote}
             </p>
           )}
         </motion.div>
@@ -320,18 +337,18 @@ const BeanPanelBody: React.FC<{
         </div>
       </div>
 
-      {product.name === "Mirumbani" && (
+      {story && (
         <>
           <StoryScrollCue
             accent={accent}
             reduceMotion={reduceMotion}
             onJump={() =>
               document
-                .getElementById("mirumbani-story-title")
+                .getElementById(story.anchor)
                 ?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" })
             }
           />
-          <MirumbaniStory reduceMotion={reduceMotion} />
+          {story.node}
         </>
       )}
     </>

@@ -1,8 +1,5 @@
-import { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import SubscriptionWizard from "./Subscription";
-import MobileSubscriptionFlow from "./MobileSubscriptionFlow";
-import { useIsMobile } from "../hooks/useIsMobile";
+import { navigate } from "../lib/router";
 
 const easeSoft = [0.25, 1, 0.5, 1] as const;
 
@@ -18,8 +15,6 @@ const scrollToSection = (id: string) => {
 
 export default function ProblemStatement() {
   const reduceMotion = useReducedMotion();
-  const isMobile = useIsMobile();
-  const [showSubscription, setShowSubscription] = useState(false);
 
   const steps = [
     {
@@ -30,7 +25,7 @@ export default function ProblemStatement() {
     {
       title: "Choose",
       description: "A roast or a subscription — your ritual.",
-      action: () => setShowSubscription(true),
+      action: () => navigate("rituals"),
     },
     {
       title: "Enjoy",
@@ -89,18 +84,6 @@ export default function ProblemStatement() {
           ))}
         </div>
       </div>
-
-      {isMobile ? (
-        <MobileSubscriptionFlow
-          isOpen={showSubscription}
-          onClose={() => setShowSubscription(false)}
-        />
-      ) : (
-        <SubscriptionWizard
-          isOpen={showSubscription}
-          onClose={() => setShowSubscription(false)}
-        />
-      )}
     </section>
   );
 }

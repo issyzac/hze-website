@@ -16,10 +16,8 @@ export interface RoastedCoffeeBeanProduct {
   roastDate?: string;
   certifications?: string[]; // e.g., ["organic", "fair-trade"]
   backgroundColor: string;
-  /** Seasonal lots are shown with a limited-release badge and a stock line. */
+  /** Seasonal lots wear a limited-release badge; the note itself is per-bean copy. */
   seasonal?: boolean;
-  /** Human-readable size of the release, e.g. "250kg — one harvest". */
-  releaseSize?: string;
 }
 
 // Bundle item interface
