@@ -355,6 +355,66 @@ const BeanPanelBody: React.FC<{
   );
 };
 
+/**
+ * Bring the bean grid into view after a deep link like `#mirumbani`.
+ *
+ * A single scroll lands short: App scrolls to the top on mount (child effects
+ * run first, so ours would be undone) and the sections above keep changing
+ * height as their images decode. So this re-aligns on a short poll rather than
+ * scrolling once.
+ *
+ * Deliberately not requestAnimationFrame: a shared link is very often opened
+ * into a background tab, where rAF never fires at all — the reader would switch
+ * to it and find the top of the page. Timers still run there, and the
+ * visibility listener catches up the moment the tab is looked at.
+ *
+ * `instant` because `html { scroll-behavior: smooth }` would otherwise animate
+ * the landing, and any real scroll input hands control back to the reader.
+ */
+const revealPanel = () => {
+  if (!document.getElementById("products")) return;
+
+  let done = false;
+  let timer = 0;
+
+  const finish = () => {
+    if (done) return;
+    done = true;
+    window.clearTimeout(timer);
+    window.removeEventListener("wheel", finish);
+    window.removeEventListener("touchstart", finish);
+    window.removeEventListener("keydown", finish);
+    window.removeEventListener("load", align);
+    document.removeEventListener("visibilitychange", align);
+  };
+
+  function align() {
+    const target = document.getElementById("products");
+    if (done || !target) return;
+    const header = document.querySelector("header");
+    const headerH = header ? (header as HTMLElement).offsetHeight : 0;
+    const top = target.getBoundingClientRect().top + window.scrollY - headerH - 16;
+    if (Math.abs(top - window.scrollY) > 2) {
+      window.scrollTo({ top, behavior: "instant" as ScrollBehavior });
+    }
+  }
+
+  const poll = (remaining: number) => {
+    align();
+    if (remaining <= 0) return finish();
+    timer = window.setTimeout(() => poll(remaining - 1), 120);
+  };
+
+  const opts = { passive: true } as const;
+  window.addEventListener("wheel", finish, opts);
+  window.addEventListener("touchstart", finish, opts);
+  window.addEventListener("keydown", finish, opts);
+  window.addEventListener("load", align);
+  document.addEventListener("visibilitychange", align);
+
+  poll(16);
+};
+
 /* -------------------------------------------------------------- section --- */
 
 const ProductHighlights: React.FC<{
@@ -371,7 +431,9 @@ const ProductHighlights: React.FC<{
       const slug = window.location.hash.replace(/^#/, "");
       if (!slug) return;
       const match = products.find((p) => beanSlug(p.name) === slug);
-      if (match) setOpenId(match.id);
+      if (!match) return;
+      setOpenId(match.id);
+      revealPanel();
     };
     fromHash();
     window.addEventListener("hashchange", fromHash);
