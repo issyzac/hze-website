@@ -103,13 +103,13 @@ export const MIRUMBANI_BEATS: StoryBeat[] = [
     id: "kazi",
     eyebrow: "Kazi · The work, and the first harvest",
     paragraphs: [
-      "At 1,200–1,300 metres, the cherries are hand-picked, washed, and sun-dried on raised beds. Nothing hurried, nothing erased. Mrumba trees stand on both estates; at the family home in Kibingo, another marks the place where a former Mwami — a chief of the Waha — used to rest while visiting his people.",
-      "The first harvest came in 2026: nine acres, around 900 kilograms of cherry, and one very proud journey carrying the first sample to the tasters. In the cup: red berry, sweet orange, brown sugar.",
+      "At 1,200–1,300 metres, the cherries are hand-picked, washed, and sun-dried on African beds. Nothing hurried, nothing erased. Mrumba trees stand on both estates; at the family home in Kibingo, another marks the place where a former Mwami — a chief of the Waha — used to rest while visiting his people.",
+      "The first harvest came in 2026: nine acres, producing enough cherries to power your cup for the rest of the year, and one very proud journey carrying the first sample to the tasters. In the cup: red berry, sweet orange, brown sugar.",
     ],
     photo: {
       src: "/assets/images/mirumbani/zitto-drying-beds.jpg",
-      alt: "Zitto lifting a handful of drying parchment coffee from a raised bed, rows of beds stretching behind him",
-      caption: "Turning parchment on the raised beds.",
+      alt: "Zitto lifting a handful of drying parchment coffee from a raised African bed, rows of beds stretching behind him",
+      caption: "Turning parchment on the African beds.",
       orientation: "portrait",
     },
   },
@@ -130,9 +130,9 @@ export const MIRUMBANI_VOW =
 /** First-harvest facts, set as a small spec run under the story. */
 export const MIRUMBANI_FACTS: { label: string; value: string }[] = [
   { label: "Mwinuko · Altitude", value: "1,200–1,300 m" },
-  { label: "Mchakato · Process", value: "Washed · sun-dried on raised beds" },
+  { label: "Mchakato · Process", value: "Washed · sun-dried on African beds" },
   { label: "Ushirika · Cooperative", value: "RUMAKO, Matyazo" },
-  { label: "Mavuno ya kwanza · First harvest", value: "2026 · nine acres · ~900 kg cherry" },
+  { label: "Mavuno ya kwanza · First harvest", value: "2026 · nine acres" },
 ];
 
 /** Closing line from the label. */

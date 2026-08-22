@@ -4,6 +4,7 @@ import type { RoastedCoffeeBeanProduct } from "../types";
 import { waLink } from "../lib/whatsapp";
 import CoffeeBag, { type BagPalette } from "./CoffeeBag";
 import MirumbaniStory from "./MirumbaniStory";
+import KilimanjaroStory from "./KilimanjaroStory";
 
 const easeSoft = [0.25, 1, 0.5, 1] as const;
 
@@ -19,6 +20,8 @@ type BeanStyle = {
   panelBg: string;
   /** Gusset colours + printed region for the drawn bag. */
   bag: BagPalette;
+  /** Shown under the buy line on seasonal lots. */
+  seasonalNote?: string;
 };
 
 const BEAN_STYLES: Record<string, BeanStyle> = {
@@ -36,6 +39,8 @@ const BEAN_STYLES: Record<string, BeanStyle> = {
       region: "KILIMANJARO",
       accent: "#2B7A6E",
     },
+    seasonalNote:
+      "One harvest from the southern slopes of Kilimanjaro. When the season turns, so does the cup.",
   },
   Tunu: {
     accent: "#B37542",
@@ -82,6 +87,8 @@ const BEAN_STYLES: Record<string, BeanStyle> = {
       accent: "#2E4B34",
       labelStyle: "kigoma",
     },
+    seasonalNote:
+      "Msimu huu tumevuna 250kg tu — one harvest, then we wait for the hills.",
   },
 };
 
@@ -207,8 +214,22 @@ const BeanPanelBody: React.FC<{
   onClose: () => void;
   reduceMotion: boolean | null;
 }> = ({ product, onClose, reduceMotion }) => {
-  const { accent, mood, eyebrow, imageSide } = styleFor(product.name);
+  const { accent, mood, eyebrow, imageSide, seasonalNote } = styleFor(product.name);
   const imageFirst = imageSide === "left";
+
+  // Beans with a field story render it under the buy panel.
+  const story =
+    product.name === "Mirumbani"
+      ? {
+          anchor: "mirumbani-story-title",
+          node: <MirumbaniStory reduceMotion={reduceMotion} />,
+        }
+      : product.name === "Nguvu"
+        ? {
+            anchor: "kilimanjaro-story-title",
+            node: <KilimanjaroStory reduceMotion={reduceMotion} />,
+          }
+        : null;
 
   return (
     <>
@@ -294,13 +315,9 @@ const BeanPanelBody: React.FC<{
             </span>
           </div>
 
-          {product.seasonal && product.releaseSize && (
-            <p
-              className="mt-5 font-sans text-sm"
-              style={{ color: accent }}
-            >
-              Msimu huu tumevuna {product.releaseSize} tu — one harvest, then we
-              wait for the hills.
+          {product.seasonal && seasonalNote && (
+            <p className="mt-5 font-sans text-sm" style={{ color: accent }}>
+              {seasonalNote}
             </p>
           )}
         </motion.div>
@@ -320,22 +337,82 @@ const BeanPanelBody: React.FC<{
         </div>
       </div>
 
-      {product.name === "Mirumbani" && (
+      {story && (
         <>
           <StoryScrollCue
             accent={accent}
             reduceMotion={reduceMotion}
             onJump={() =>
               document
-                .getElementById("mirumbani-story-title")
+                .getElementById(story.anchor)
                 ?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" })
             }
           />
-          <MirumbaniStory reduceMotion={reduceMotion} />
+          {story.node}
         </>
       )}
     </>
   );
+};
+
+/**
+ * Bring the bean grid into view after a deep link like `#mirumbani`.
+ *
+ * A single scroll lands short: App scrolls to the top on mount (child effects
+ * run first, so ours would be undone) and the sections above keep changing
+ * height as their images decode. So this re-aligns on a short poll rather than
+ * scrolling once.
+ *
+ * Deliberately not requestAnimationFrame: a shared link is very often opened
+ * into a background tab, where rAF never fires at all — the reader would switch
+ * to it and find the top of the page. Timers still run there, and the
+ * visibility listener catches up the moment the tab is looked at.
+ *
+ * `instant` because `html { scroll-behavior: smooth }` would otherwise animate
+ * the landing, and any real scroll input hands control back to the reader.
+ */
+const revealPanel = () => {
+  if (!document.getElementById("products")) return;
+
+  let done = false;
+  let timer = 0;
+
+  const finish = () => {
+    if (done) return;
+    done = true;
+    window.clearTimeout(timer);
+    window.removeEventListener("wheel", finish);
+    window.removeEventListener("touchstart", finish);
+    window.removeEventListener("keydown", finish);
+    window.removeEventListener("load", align);
+    document.removeEventListener("visibilitychange", align);
+  };
+
+  function align() {
+    const target = document.getElementById("products");
+    if (done || !target) return;
+    const header = document.querySelector("header");
+    const headerH = header ? (header as HTMLElement).offsetHeight : 0;
+    const top = target.getBoundingClientRect().top + window.scrollY - headerH - 16;
+    if (Math.abs(top - window.scrollY) > 2) {
+      window.scrollTo({ top, behavior: "instant" as ScrollBehavior });
+    }
+  }
+
+  const poll = (remaining: number) => {
+    align();
+    if (remaining <= 0) return finish();
+    timer = window.setTimeout(() => poll(remaining - 1), 120);
+  };
+
+  const opts = { passive: true } as const;
+  window.addEventListener("wheel", finish, opts);
+  window.addEventListener("touchstart", finish, opts);
+  window.addEventListener("keydown", finish, opts);
+  window.addEventListener("load", align);
+  document.addEventListener("visibilitychange", align);
+
+  poll(16);
 };
 
 /* -------------------------------------------------------------- section --- */
@@ -354,7 +431,9 @@ const ProductHighlights: React.FC<{
       const slug = window.location.hash.replace(/^#/, "");
       if (!slug) return;
       const match = products.find((p) => beanSlug(p.name) === slug);
-      if (match) setOpenId(match.id);
+      if (!match) return;
+      setOpenId(match.id);
+      revealPanel();
     };
     fromHash();
     window.addEventListener("hashchange", fromHash);

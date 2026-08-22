@@ -14,7 +14,7 @@ export const mockProducts: RoastedCoffeeBeanProduct[] = [
     description:
       'Seasonal Kigoma lot from the Josina and Alaa estates — red berry brightness, sweet orange, and a brown-sugar finish',
     image: '/assets/images/mirumbani/mrumba-tree.png',
-    price: '18,000',
+    price: '22,000',
     category: 'Mirumbani',
     roastLevel: 'medium',
     origin: 'Kigoma, Tanzania',
@@ -26,26 +26,26 @@ export const mockProducts: RoastedCoffeeBeanProduct[] = [
     roastDate: '2026-06-01',
     certifications: ['organic'],
     backgroundColor: '#E3E3E3',
-    seasonal: true,
-    releaseSize: '250kg'
+    seasonal: true
   },
   {
     id: '1',
     name: 'Nguvu',
     description: 'Classic Tanzanian washed roast — milk chocolate and caramel sweetness, smooth acidity, full body',
     image: '/assets/images/nguvu.PNG',
-    price: '20,000',
+    price: '24,000',
     category: 'Nguvu',
     roastLevel: 'medium',
-    origin: 'Tanzania',
+    origin: 'Kilimanjaro, Tanzania',
     flavorNotes: ['milk chocolate', 'caramel', 'smooth'],
     weight: '250g',
     grindType: 'whole-bean',
     caffeineContent: 'regular',
-    processingMethod: 'natural',
-    roastDate: '2024-01-15',
+    processingMethod: 'washed',
+    roastDate: '2026-08-01',
     certifications: ['organic'],
-    backgroundColor: '#E3E3E3'
+    backgroundColor: '#E3E3E3',
+    seasonal: true
   },
   {
     id: '2',

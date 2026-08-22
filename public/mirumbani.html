@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/hze.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!--
+      Share target for Mirumbani.
+
+      The site is a single-page app, so crawlers never see the #mirumbani hash —
+      they would read the site-wide card instead. This page carries Mirumbani's
+      own Open Graph tags for WhatsApp, X and the rest, then sends people on to
+      the panel itself.
+    -->
+    <title>Mirumbani — Kahawa ya Kurudi Nyumbani | Harakati za Enzi</title>
+    <meta
+      name="description"
+      content="Ningekuwa kwetu Mirumbani, ningemlilia mama. A seasonal single-origin from the Josina and Alaa estates in Kigoma — red berry, sweet orange, brown sugar — and the song it is named for."
+    />
+    <link rel="canonical" href="https://harakatizaenzi.com/mirumbani.html" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="product" />
+    <meta property="og:site_name" content="Harakati za Enzi" />
+    <meta property="og:title" content="Mirumbani — Kahawa ya Kurudi Nyumbani" />
+    <meta
+      property="og:description"
+      content="Ningekuwa kwetu Mirumbani, ningemlilia mama. A seasonal Kigoma single-origin from the Josina and Alaa estates, and the song it is named for."
+    />
+    <meta property="og:url" content="https://harakatizaenzi.com/mirumbani.html" />
+    <meta
+      property="og:image"
+      content="https://harakatizaenzi.com/assets/images/mirumbani/mirumbani-share.jpg"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Zitto with his daughters Josina and Alaa looking at coffee cherries in Kigoma, beside the words Kahawa ya Kurudi Nyumbani."
+    />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@harakatizaenzi" />
+    <meta name="twitter:title" content="Mirumbani — Kahawa ya Kurudi Nyumbani" />
+    <meta
+      name="twitter:description"
+      content="A seasonal Kigoma single-origin from the Josina and Alaa estates, and the song it is named for."
+    />
+    <meta
+      name="twitter:image"
+      content="https://harakatizaenzi.com/assets/images/mirumbani/mirumbani-share.jpg"
+    />
+
+    <!-- Readers go to the panel; crawlers stop at the tags above. -->
+    <meta http-equiv="refresh" content="0; url=/#mirumbani" />
+    <script>
+      window.location.replace("/#mirumbani");
+    </script>
+
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: #2e4b34;
+        color: #f2e8d5;
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+        text-align: center;
+        padding: 2rem;
+      }
+      a {
+        color: #f2e8d5;
+      }
+    </style>
+  </head>
+  <body>
+    <p>
+      Mirumbani — kahawa ya kurudi nyumbani.<br />
+      <a href="/#mirumbani">Continue to the coffee</a>
+    </p>
+  </body>
+</html>
