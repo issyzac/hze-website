@@ -7,7 +7,7 @@ type HZEEvent = {
   title: string;
   variant?: string;
   dateISO: string;
-  category: string;
+  category?: string;
   venue: string;
   blurb: string;
 };
@@ -15,20 +15,19 @@ type HZEEvent = {
 // EDIT EVENTS HERE
 const EVENTS: HZEEvent[] = [
   {
-    title: "Brew Better at Home",
-    variant: "Bring Your Gadgets Edition",
-    dateISO: "2026-08-29",
-    category: "brew-class",
+    title: "Cupping",
+    variant: "Slurp & Score Edition",
+    dateISO: "2026-09-05",
     venue: "HZE Mbezi",
-    blurb: "Bring your own kit — grinder, dripper, press — and we'll dial it in together.",
+    blurb: "Taste side by side the way graders do — slurp, score, and find the cup that's yours.",
   },
   {
     title: "Brew Better at Home",
-    variant: "Class",
+    variant: "Bring Your Gadgets Edition",
     dateISO: "2026-09-19",
     category: "brew-class",
     venue: "HZE Mbezi",
-    blurb: "Pour-over, French press, and fixing your home brew — hands on.",
+    blurb: "Bring your own kit — grinder, dripper, press — and we'll dial it in together.",
   },
   {
     title: "Book Swap",
@@ -182,14 +181,14 @@ const EventsSection = () => {
                         className="text-5xl leading-none"
                         style={{ fontFamily: "var(--font-condensed)", fontWeight: 700 }}
                       >
-                        {d.getDate()}
+                        {String(d.getDate()).padStart(2, "0")}
                       </span>
                       <span className="font-sans text-xs uppercase tracking-widest mt-1">
                         {MONTH_ABBR[d.getMonth()]}
                       </span>
                     </div>
                     <div className="p-4 flex-1">
-                      <Chip category={event.category} />
+                      {event.category && <Chip category={event.category} />}
                       <h3
                         className="mt-2 uppercase text-ink text-2xl leading-none"
                         style={{ fontFamily: "var(--font-condensed)", fontWeight: 700 }}
