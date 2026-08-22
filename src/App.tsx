@@ -19,6 +19,7 @@ import WhatsAppFloat from './components/WhatsAppFloat'
 import SafariYaLadha from './components/SafariYaLadha'
 import CareersCTA from './components/CareersCTA'
 import CareersPage from './components/CareersPage'
+import RitualsPage from './components/RitualsPage'
 import { useRoute } from './lib/router'
 
 
@@ -50,6 +51,20 @@ function App() {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' });
   }, [route]);
+
+  if (route === 'rituals') {
+    return (
+      <div className="min-h-screen bg-cream-aged">
+        <a href="#main-content" className="skip-link">
+          Skip to content
+        </a>
+        <Header />
+        <RitualsPage />
+        <Footer />
+        <WhatsAppFloat />
+      </div>
+    );
+  }
 
   if (route === 'careers') {
     return (
@@ -96,11 +111,11 @@ function App() {
         {/* Our Story Section */}
         <OurStory />
 
-        {/* Our Values Section */}
-        <OurValues />
-
         {/* Products Section */}
         <ProductHighlights products={mockProducts} onOrderClick={openOrderModal} />
+
+        {/* Our Values Section */}
+        <OurValues />
 
         <div aria-hidden className="khanga-divider" />
 

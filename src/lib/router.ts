@@ -7,7 +7,7 @@
 
 import { useSyncExternalStore } from "react";
 
-export type Route = "home" | "careers";
+export type Route = "home" | "careers" | "rituals";
 
 const ROUTE_EVENT = "hze:routechange";
 
@@ -22,8 +22,10 @@ export const getRoute = (): Route => {
   if (typeof window === "undefined") return "home";
   const hash = window.location.hash.replace(/^#/, "");
   if (hash.startsWith("/careers")) return "careers";
+  if (hash.startsWith("/rituals")) return "rituals";
   const path = window.location.pathname.replace(/\/+$/, "");
   if (path.endsWith("/careers") || path.endsWith("/jobs")) return "careers";
+  if (path.endsWith("/rituals") || path.endsWith("/ritual")) return "rituals";
   return "home";
 };
 
@@ -46,9 +48,9 @@ export const useRoute = (): Route =>
  * `anchor` is an element id to scroll to once the home route is rendered.
  */
 export const navigate = (route: Route, anchor?: string) => {
-  if (route === "careers") {
-    if (getRoute() !== "careers") {
-      window.location.hash = "/careers";
+  if (route !== "home") {
+    if (getRoute() !== route) {
+      window.location.hash = `/${route}`;
     } else {
       notify();
     }

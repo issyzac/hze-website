@@ -7,7 +7,28 @@ import type {
 } from '../types';
 
 // Mock coffee products data
-export const mockProducts: RoastedCoffeeBeanProduct[] = [ 
+export const mockProducts: RoastedCoffeeBeanProduct[] = [
+  {
+    id: '4',
+    name: 'Mirumbani',
+    description:
+      'Seasonal Kigoma lot from the Josina and Alaa estates — red berry brightness, sweet orange, and a brown-sugar finish',
+    image: '/assets/images/mirumbani/mrumba-tree.png',
+    price: '18,000',
+    category: 'Mirumbani',
+    roastLevel: 'medium',
+    origin: 'Kigoma, Tanzania',
+    flavorNotes: ['red berry', 'sweet orange', 'brown sugar'],
+    weight: '250g',
+    grindType: 'whole-bean',
+    caffeineContent: 'regular',
+    processingMethod: 'washed',
+    roastDate: '2026-06-01',
+    certifications: ['organic'],
+    backgroundColor: '#E3E3E3',
+    seasonal: true,
+    releaseSize: '250kg'
+  },
   {
     id: '1',
     name: 'Nguvu',

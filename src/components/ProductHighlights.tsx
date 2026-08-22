@@ -3,6 +3,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { RoastedCoffeeBeanProduct } from "../types";
 import { waLink } from "../lib/whatsapp";
 import CoffeeBag, { type BagPalette } from "./CoffeeBag";
+import MirumbaniStory from "./MirumbaniStory";
 
 const easeSoft = [0.25, 1, 0.5, 1] as const;
 
@@ -66,6 +67,22 @@ const BEAN_STYLES: Record<string, BeanStyle> = {
       accent: "#7A4E1E",
     },
   },
+  Mirumbani: {
+    accent: "#2E4B34",
+    mood: "kahawa ya kurudi nyumbani — the coffee of returning home.",
+    eyebrow: "Seasonal · Single-origin Kigoma",
+    imageSide: "left",
+    pattern: "",
+    panelBg: "#F4EDDC",
+    bag: {
+      gussetFrom: "#3E6446",
+      gussetVia: "#2E4B34",
+      gussetTo: "#1F3324",
+      region: "KIGOMA",
+      accent: "#2E4B34",
+      labelStyle: "kigoma",
+    },
+  },
 };
 
 const FALLBACK_STYLE: BeanStyle = {
@@ -85,6 +102,9 @@ const FALLBACK_STYLE: BeanStyle = {
 };
 
 const styleFor = (name: string): BeanStyle => BEAN_STYLES[name] ?? FALLBACK_STYLE;
+
+/** Panels are addressable as #<name> so a shared link opens the right bean. */
+export const beanSlug = (name: string) => name.toLowerCase();
 
 /* ---------------------------------------------------------------- tile --- */
 
@@ -116,6 +136,15 @@ const BagTile: React.FC<{
         <CoffeeBag product={product} palette={bag} />
       </motion.div>
 
+      {product.seasonal && (
+        <span
+          className="absolute left-4 top-4 rounded-full px-3 py-1 font-sans text-[10px] uppercase tracking-[0.2em] text-white"
+          style={{ backgroundColor: accent }}
+        >
+          Msimu · Seasonal
+        </span>
+      )}
+
       {/* Name reveals on hover / keyboard focus */}
       <span
         className="absolute bottom-5 left-0 right-0 text-center font-sans text-[11px] uppercase tracking-[0.25em] opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100"
@@ -127,6 +156,49 @@ const BagTile: React.FC<{
     </motion.button>
   );
 };
+
+/* ------------------------------------------------------------ scroll cue --- */
+
+/**
+ * Sits at the foot of the buy panel when a story follows it. Without this the
+ * story reads as the end of the page — the section below is only a sliver of
+ * green until you scroll.
+ */
+const StoryScrollCue: React.FC<{
+  accent: string;
+  reduceMotion: boolean | null;
+  onJump: () => void;
+}> = ({ accent, reduceMotion, onJump }) => (
+  <div className="flex justify-center pb-10">
+    <button
+      type="button"
+      onClick={onJump}
+      className="btn-press inline-flex min-h-[44px] flex-col items-center gap-1 rounded-full px-6 py-2 font-sans transition-opacity hover:opacity-70 focus:outline-none focus-visible:ring-4 focus-visible:ring-bronze-deep/30"
+      style={{ color: accent }}
+    >
+      <span className="text-[11px] uppercase tracking-[0.28em]">
+        Soma hadithi · Scroll for the story
+      </span>
+      <motion.svg
+        width="18"
+        height="18"
+        viewBox="0 0 18 18"
+        fill="none"
+        aria-hidden
+        animate={reduceMotion ? undefined : { y: [0, 5, 0] }}
+        transition={{ duration: 1.8, ease: "easeInOut", repeat: Infinity }}
+      >
+        <path
+          d="M4 7l5 5 5-5"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </motion.svg>
+    </button>
+  </div>
+);
 
 /* --------------------------------------------------------------- panel --- */
 
@@ -221,6 +293,16 @@ const BeanPanelBody: React.FC<{
               TZS {product.price} · {product.weight} · whole bean
             </span>
           </div>
+
+          {product.seasonal && product.releaseSize && (
+            <p
+              className="mt-5 font-sans text-sm"
+              style={{ color: accent }}
+            >
+              Msimu huu tumevuna {product.releaseSize} tu — one harvest, then we
+              wait for the hills.
+            </p>
+          )}
         </motion.div>
 
         {/* Bag */}
@@ -237,6 +319,21 @@ const BeanPanelBody: React.FC<{
           </motion.div>
         </div>
       </div>
+
+      {product.name === "Mirumbani" && (
+        <>
+          <StoryScrollCue
+            accent={accent}
+            reduceMotion={reduceMotion}
+            onJump={() =>
+              document
+                .getElementById("mirumbani-story-title")
+                ?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" })
+            }
+          />
+          <MirumbaniStory reduceMotion={reduceMotion} />
+        </>
+      )}
     </>
   );
 };
@@ -250,6 +347,28 @@ const ProductHighlights: React.FC<{
   const reduceMotion = useReducedMotion();
   const [openId, setOpenId] = useState<string | null>(null);
   const openProduct = products.find((p) => p.id === openId) ?? null;
+
+  // A shared link (#mirumbani) lands on the open panel rather than the grid.
+  useEffect(() => {
+    const fromHash = () => {
+      const slug = window.location.hash.replace(/^#/, "");
+      if (!slug) return;
+      const match = products.find((p) => beanSlug(p.name) === slug);
+      if (match) setOpenId(match.id);
+    };
+    fromHash();
+    window.addEventListener("hashchange", fromHash);
+    return () => window.removeEventListener("hashchange", fromHash);
+  }, [products]);
+
+  // Keep the address bar in step so the share buttons copy a working link.
+  useEffect(() => {
+    const slug = openProduct ? `#${beanSlug(openProduct.name)}` : "";
+    const target = window.location.pathname + window.location.search + slug;
+    if (window.location.hash !== slug) {
+      window.history.replaceState(null, "", target);
+    }
+  }, [openProduct]);
 
   // Escape closes the expanded panel.
   useEffect(() => {

@@ -22,6 +22,15 @@
   --color-hze-red: #B83528;
   --color-ink: #1C1408;
 
+  /* Ritual page extension — deeper teals, warm paper tints, clay */
+  --color-teal-deep: #1B5248;
+  --color-teal-light: #3A9585;
+  --color-cream-warm: #F4EDDC;
+  --color-cream-pale: #F7F3ED;
+  --color-sand: #C9A87A;
+  --color-clay: #C06030;
+  --color-ink-deep: #2E2010;
+
   --font-display: "GT Alpina", Georgia, serif;
   --font-condensed: "GT Alpina Condensed", "Arial Narrow", sans-serif;
   --font-sans: "Circular Std", system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
