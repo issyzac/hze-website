@@ -3,6 +3,7 @@ import { AnimatePresence, motion, type Transition } from "framer-motion";
 import { ChevronRight, ChevronLeft, X } from "lucide-react";
 import { useSubscriptionForm } from "../hooks/useSubscriptionForm";
 import { type CupsRange, type BrewMethod, type GrindPref, type Schedule } from "../data/contact";
+import { bagPrice, money, priceForGrams } from "../data/pricing";
 
 type CoffeeProduct = "Nguvu" | "Tunu" | "Amka";
 
@@ -49,8 +50,8 @@ const BREW_OPTIONS: BrewMethod[] = ["Espresso", "Pour-Over", "French Press", "Co
 const GRIND_OPTIONS: GrindPref[] = ["Whole Bean", "Ground"];
 const SCHEDULE_OPTIONS: Schedule[] = ["Every 4 weeks"];
 const COFFEE_PRODUCTS = [
-  { name: "Tunu" as CoffeeProduct, price: "TSH 25,000 / 250g", flavorNotes: "Stone fruit, chocolate, full-bodied" },
-  { name: "Amka" as CoffeeProduct, price: "TSH 18,000 / 250g", flavorNotes: "Apricot, citrus zest, caramel" }
+  { name: "Tunu" as CoffeeProduct, price: `${bagPrice("Tunu", "TSH")} / 250g`, flavorNotes: "Stone fruit, chocolate, full-bodied" },
+  { name: "Amka" as CoffeeProduct, price: `${bagPrice("Amka", "TSH")} / 250g`, flavorNotes: "Apricot, citrus zest, caramel" }
 ];
 
 // Shared card base using SECONDARY with subtle border
@@ -87,7 +88,7 @@ function calculateRecommendedSize(cupsPerDay: number, _frequency: Schedule): str
   }
 }
 
-function calculatePrice(cupsPerDay: number, _frequency: Schedule): string {
+function calculatePrice(cupsPerDay: number, _frequency: Schedule, coffeeProduct: string): string {
   const gramsPerCup = 20;
   const daysInPeriod = 28; // Every 4 weeks
   
@@ -98,13 +99,7 @@ function calculatePrice(cupsPerDay: number, _frequency: Schedule): string {
   const recommendedSizeGrams = availableSizes.find(size => size >= totalWithBuffer) || 
      Math.ceil(totalWithBuffer / 25000) * 25000;
   
-  // Price: TSH 25,000 per 250g
-  const pricePerGram = 25000 / 250; // TSH 100 per gram
-  
-  const totalPrice = recommendedSizeGrams * pricePerGram;
-  
-  // Format price with thousand separators
-  return `TSH ${totalPrice.toLocaleString()}`;
+  return money(priceForGrams(coffeeProduct, recommendedSizeGrams), "TSH");
 }
 
 function getCupsPerDay(cupsRange: CupsRange | "", customCups?: number): number {
@@ -316,7 +311,7 @@ export default function MobileSubscriptionFlow({ isOpen, onClose }: Subscription
     // Calculate recommended size and price
     const cupsPerDay = getCupsPerDay(data.cupsRange, data.customCups);
     const recommendedSize = calculateRecommendedSize(cupsPerDay, data.schedule as Schedule);
-    const calculatedPrice = calculatePrice(cupsPerDay, data.schedule as Schedule);
+    const calculatedPrice = calculatePrice(cupsPerDay, data.schedule as Schedule, data.coffeeProduct);
 
     // Convert component data to hook format
     const formData = {
@@ -545,7 +540,7 @@ export default function MobileSubscriptionFlow({ isOpen, onClose }: Subscription
                 {SCHEDULE_OPTIONS.map((opt) => {
                   const cupsPerDay = getCupsPerDay(data.cupsRange, data.customCups);
                   const recommendedSize = calculateRecommendedSize(cupsPerDay, opt);
-                  const price = calculatePrice(cupsPerDay, opt);
+                  const price = calculatePrice(cupsPerDay, opt, data.coffeeProduct);
                   const smartLabel = `${opt} (${recommendedSize})`;
                   const description = `${getSmartDescription(cupsPerDay)} • ${price}`;
                   

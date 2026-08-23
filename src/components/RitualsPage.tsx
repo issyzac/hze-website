@@ -15,6 +15,7 @@ import {
   questionsFor,
   type Answers,
 } from "../data/rituals";
+import { fromPrice, money, priceForGrams } from "../data/pricing";
 import { WA_NUMBER, waLink } from "../lib/whatsapp";
 import { navigate } from "../lib/router";
 
@@ -286,7 +287,7 @@ export default function RitualsPage() {
               </div>
 
               <p className="font-sans text-sm text-ink/55 mt-5">
-                From TZS 18,000 per delivery · Pause, skip, swap anytime
+                From {fromPrice()} per delivery · Pause, skip, swap anytime
               </p>
             </motion.div>
 
@@ -492,7 +493,7 @@ export default function RitualsPage() {
                     </span>
                   </div>
                   <span className="font-sans font-medium text-[17px] whitespace-nowrap">
-                    TZS {coffee.price.toLocaleString("en-US")}
+                    {money(coffee.price)}
                   </span>
                 </div>
               ))}
@@ -502,7 +503,8 @@ export default function RitualsPage() {
               Your delivery price is simply bag size × coffee. Nothing hidden.
             </p>
             <p className="inline-block bg-teal-deep text-cream-aged font-sans text-sm px-4.5 py-2.5 mt-3.5">
-              Example: 500g of Tunu every 3 weeks — TZS 50,000 per delivery
+              Example: 500g of Tunu every 3 weeks — {money(priceForGrams("Tunu", 500))} per
+              delivery
             </p>
           </motion.div>
 

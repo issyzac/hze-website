@@ -8,22 +8,35 @@
 // Coffees
 // ---------------------------------------------------------------------------
 
+import {
+  COFFEE_NAMES,
+  DEFAULT_COFFEE,
+  PRICE_PER_BAG,
+  type CoffeeName,
+  fromPrice,
+  fromPriceForGrams,
+  money,
+  priceForGrams,
+} from "./pricing";
+
 export interface Coffee {
-  name: string;
+  name: CoffeeName;
   notes: string;
-  /** Price per 250g, TZS. */
+  /** Price per 250g, TZS — read from the pricing table, never typed here. */
   price: number;
 }
 
-export const COFFEES: Coffee[] = [
-  { name: "Amka", notes: "apricot, citrus zest, caramel", price: 18000 },
-  { name: "Nguvu", notes: "milk chocolate, caramel, smooth", price: 20000 },
-  { name: "Tunu", notes: "stone fruit, chocolate, full body", price: 25000 },
-];
+const NOTES_BY_COFFEE: Record<CoffeeName, string> = {
+  Amka: "apricot, citrus zest, caramel",
+  Mirumbani: "red berry, sweet orange, brown sugar",
+  Nguvu: "milk chocolate, caramel, smooth",
+  Tunu: "stone fruit, chocolate, full body",
+};
 
-const PRICE_BY_COFFEE: Record<string, number> = Object.fromEntries(
-  COFFEES.map((c) => [c.name, c.price]),
-);
+/** The catalogue, cheapest first — prices come from `pricing.ts`. */
+export const COFFEES: Coffee[] = [...COFFEE_NAMES]
+  .sort((a, b) => PRICE_PER_BAG[a] - PRICE_PER_BAG[b])
+  .map((name) => ({ name, notes: NOTES_BY_COFFEE[name], price: PRICE_PER_BAG[name] }));
 
 // ---------------------------------------------------------------------------
 // How it works
@@ -35,7 +48,9 @@ export const HOW_IT_WORKS = [
     color: "#2B7A6E",
     title: "Find your coffee",
     detail:
-      "Take Safari ya Ladha, or pick the bag you already love. Amka. Nguvu. Tunu.",
+      `Take Safari ya Ladha, or pick the bag you already love. ${COFFEES.map(
+        (c) => c.name,
+      ).join(". ")}.`,
   },
   {
     step: "02",
@@ -80,7 +95,7 @@ export const RITUAL_PLANS: RitualPlan[] = [
       "Grind matched to your brew method",
       "WhatsApp reminder before each delivery",
     ],
-    price: "From TZS 18,000 per delivery",
+    price: `From ${fromPrice()} per delivery`,
   },
   {
     name: "Nishangaze",
@@ -94,7 +109,7 @@ export const RITUAL_PLANS: RitualPlan[] = [
       "Tasting card with every bag",
       "First access to microlots and releases",
     ],
-    price: "From TZS 20,000 per delivery",
+    price: `From ${fromPrice()} per delivery`,
   },
   {
     name: "Kawaida ya Ofisi",
@@ -287,7 +302,7 @@ export const questionsFor = (answers: Answers): Question[] => {
       sub: "Price per 250g.",
       options: COFFEES.map((c) => ({
         label: c.name,
-        note: `${c.notes.split(",").slice(0, 2).join(",")} — TZS ${c.price.toLocaleString("en-US")}`,
+        note: `${c.notes.split(",").slice(0, 2).join(",")} — ${money(c.price)}`,
       })),
     });
   }
@@ -320,8 +335,6 @@ const BAG_SIZES = [250, 500, 1000, 2000, 3000, 5000];
 const formatSize = (grams: number) =>
   grams >= 1000 ? `${grams / 1000}kg` : `${grams}g`;
 
-const formatTzs = (amount: number) => `TZS ${amount.toLocaleString("en-US")}`;
-
 /**
  * Turn the answers into a named ritual: a bag size that lasts about three
  * weeks, the delivery cadence that implies, and the price for that bag.
@@ -338,7 +351,6 @@ export const computeResult = (answers: Answers): RitualResult => {
   const weeks = Math.max(1, Math.min(4, Math.floor(size / daily / 7)));
   const rhythm = `Every ${weeks === 1 ? "week" : `${weeks} weeks`}`;
   const sizeLabel = formatSize(size);
-  const bags = size / 250;
 
   if (office) {
     return {
@@ -359,7 +371,8 @@ export const computeResult = (answers: Answers): RitualResult => {
   }
 
   if (surprise) {
-    const from = formatTzs(bags * 20000);
+    // Roaster's pick, so quote the cheapest bag in the catalogue.
+    const from = fromPriceForGrams(size);
     return {
       name: "Nishangaze",
       color: "#B83528",
@@ -375,8 +388,8 @@ export const computeResult = (answers: Answers): RitualResult => {
     };
   }
 
-  const coffee = answers.coffee ?? "Nguvu";
-  const price = formatTzs(bags * (PRICE_BY_COFFEE[coffee] ?? 20000));
+  const coffee = answers.coffee ?? DEFAULT_COFFEE;
+  const price = money(priceForGrams(coffee, size));
 
   return {
     name: "Kawaida Yangu",

@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useRef, useState, useCallback } from "react"
 import { AnimatePresence, motion, type Transition } from "framer-motion";
 import { useSubscriptionForm } from "../hooks/useSubscriptionForm";
 import { type CupsRange, type BrewMethod, type GrindPref, type Schedule } from "../data/contact";
+import { bagPrice, money, priceForGrams } from "../data/pricing";
 
 // ------------------------------------------------------
 // Types
@@ -41,8 +42,8 @@ const CUP_OPTIONS: CupsRange[] = ["1 cup a day", "A cup every other day", "Two o
 const BREW_OPTIONS: BrewMethod[] = ["Espresso", "Pour-Over", "French Press", "Cold Brew"];
 const GRIND_OPTIONS: GrindPref[] = ["Whole Bean", "Ground"];
 const COFFEE_OPTIONS = [
-  { name: "Tunu", description: "Full-bodied dark roast, stone fruit & chocolate", price: "TSH 25,000" },
-  { name: "Amka", description: "Bright medium roast, apricot & citrus", price: "TSH 18,000" }
+  { name: "Tunu", description: "Full-bodied dark roast, stone fruit & chocolate", price: bagPrice("Tunu", "TSH") },
+  { name: "Amka", description: "Bright medium roast, apricot & citrus", price: bagPrice("Amka", "TSH") }
 ] as const;
 const SCHEDULE_OPTIONS: Schedule[] = ["Every 4 weeks"];
 
@@ -52,15 +53,6 @@ const brewToGrindMap: Record<BrewMethod, string> = {
   "French Press": "Coarse grind for immersion",
   "Cold Brew": "Extra-coarse grind for steeping",
 };
-
-function getCoffeePrice(coffeeProduct: string): number {
-  switch (coffeeProduct) {
-    case "Nguvu": return 20000;
-    case "Tunu": return 25000;
-    case "Amka": return 18000;
-    default: return 25000;
-  }
-}
 
 function calculateRecommendedSize(cupsPerDay: number, _frequency: Schedule): string {
   const gramsPerCup = 20;
@@ -97,12 +89,7 @@ function calculatePrice(cupsPerDay: number, _frequency: Schedule, coffeeProduct:
   const recommendedSizeGrams = availableSizes.find(size => size >= totalWithBuffer) || 
      Math.ceil(totalWithBuffer / 25000) * 25000;
   
-  const basePrice = getCoffeePrice(coffeeProduct);
-  const pricePerGram = basePrice / 250;
-  
-  const totalPrice = recommendedSizeGrams * pricePerGram;
-  
-  return `TSH ${totalPrice.toLocaleString()}`;
+  return money(priceForGrams(coffeeProduct, recommendedSizeGrams), "TSH");
 }
 
 function getCupsPerDay(cupsRange: CupsRange | "", customCups?: number): number {

@@ -5,6 +5,7 @@ import type {
   SuperFeature,
   SocialLink
 } from '../types';
+import { amount, priceForBag } from './pricing';
 
 // Mock coffee products data
 export const mockProducts: RoastedCoffeeBeanProduct[] = [
@@ -14,7 +15,7 @@ export const mockProducts: RoastedCoffeeBeanProduct[] = [
     description:
       'Seasonal Kigoma lot from the Josina and Alaa estates — red berry brightness, sweet orange, and a brown-sugar finish',
     image: '/assets/images/mirumbani/mrumba-tree.png',
-    price: '22,000',
+    price: amount(priceForBag('Mirumbani')),
     category: 'Mirumbani',
     roastLevel: 'medium',
     origin: 'Kigoma, Tanzania',
@@ -33,7 +34,7 @@ export const mockProducts: RoastedCoffeeBeanProduct[] = [
     name: 'Nguvu',
     description: 'Classic Tanzanian washed roast — milk chocolate and caramel sweetness, smooth acidity, full body',
     image: '/assets/images/nguvu.PNG',
-    price: '24,000',
+    price: amount(priceForBag('Nguvu')),
     category: 'Nguvu',
     roastLevel: 'medium',
     origin: 'Kilimanjaro, Tanzania',
@@ -52,7 +53,7 @@ export const mockProducts: RoastedCoffeeBeanProduct[] = [
     name: 'Tunu',
     description: 'Full-bodied medium roast with stone fruit sweetness and a rounded, chocolatey finish',
     image: '/assets/images/tunu.PNG',
-    price: '25,000',
+    price: amount(priceForBag('Tunu')),
     category: 'Tunu',
     roastLevel: 'medium',
     origin: 'Tanzania',
@@ -70,7 +71,7 @@ export const mockProducts: RoastedCoffeeBeanProduct[] = [
     name: 'Amka',
     description: 'Bright, clean, and delicate with apricot and citrus zest, rounded by caramel sweetness and a well-structured medium body',
     image: '/assets/images/amka.jpeg',
-    price: '18,000',
+    price: amount(priceForBag('Amka')),
     category: 'Amka',
     roastLevel: 'medium',
     origin: 'Tanzania',

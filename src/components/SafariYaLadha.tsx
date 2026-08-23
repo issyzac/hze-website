@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { waLink } from "../lib/whatsapp";
+import { bagPrice, type CoffeeName } from "../data/pricing";
 
 const easeSoft = [0.25, 1, 0.5, 1] as const;
 
@@ -14,9 +15,13 @@ interface Personality {
   notes: [string, string, string];
   productName: string;
   brew: string;
-  price: string;
+  /** Which bag this personality is sold — the price follows from it. */
+  coffee: CoffeeName;
   color: string;
 }
+
+/** Price per 250g of the bag a personality lands on. */
+const personalityPrice = (p: Personality) => bagPrice(p.coffee);
 
 export const PERSONALITIES: Record<PersonalityKey, Personality> = {
   mwanaharakati: {
@@ -27,7 +32,7 @@ export const PERSONALITIES: Record<PersonalityKey, Personality> = {
     notes: ["Bold", "Dark chocolate", "French Press"],
     productName: "TUNU medium roast",
     brew: "French Press",
-    price: "TZS 25,000",
+    coffee: "Tunu",
     color: "#B83528",
   },
   mpole: {
@@ -38,7 +43,7 @@ export const PERSONALITIES: Record<PersonalityKey, Personality> = {
     notes: ["Smooth", "Caramel & toffee", "Cappuccino"],
     productName: "NGUVU medium roast",
     brew: "Cappuccino at home",
-    price: "TZS 20,000",
+    coffee: "Nguvu",
     color: "#B37542",
   },
   msafiri: {
@@ -49,7 +54,7 @@ export const PERSONALITIES: Record<PersonalityKey, Personality> = {
     notes: ["Bright", "Blueberry", "V60 pour-over"],
     productName: "TUNU",
     brew: "V60 pour-over — taste the blueberry",
-    price: "TZS 25,000",
+    coffee: "Tunu",
     color: "#2B7A6E",
   },
   amka: {
@@ -60,7 +65,7 @@ export const PERSONALITIES: Record<PersonalityKey, Personality> = {
     notes: ["Bright", "Apricot & citrus", "Any time"],
     productName: "AMKA",
     brew: "Any time of day",
-    price: "TZS 18,000",
+    coffee: "Amka",
     color: "#D19D71",
   },
 };
@@ -544,7 +549,7 @@ export default function SafariYaLadha() {
                 <p className="font-sans font-medium text-ink text-lg">
                   {p.productName} — {p.brew}
                 </p>
-                <p className="font-display font-light text-enzi-db text-2xl mt-1">{p.price}</p>
+                <p className="font-display font-light text-enzi-db text-2xl mt-1">{personalityPrice(p)}</p>
 
                 <label className="block mt-6 mb-2 font-sans text-sm text-ink/60" htmlFor="safari-name">
                   Andika jina lako
